@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'HomePage.dart';
 import 'SeatSelection.dart';
+import 'MapPage.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -146,6 +147,15 @@ class SearchPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => SearchPage()),
             );
           }
+
+          else if (index == 3) { // Assuming Map is the 3rd index
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Mappage()),
+            );
+          }
+
+
         },
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey[600],

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'HomePage.dart';
 import 'SearchPage.dart';
+import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 
 class Mappage extends StatefulWidget {
   const Mappage({super.key});
@@ -11,8 +13,61 @@ class Mappage extends StatefulWidget {
 }
 
 class _MappageState extends State<Mappage> {
-  static const LatLng _center = LatLng(7.2906, 80.6328); // Coordinates for Kandy, Sri Lanka
-  static const LatLng _currentLocation = LatLng(7.2906, 80.6328); // Example current location (Kandy)
+  LatLng _currentLocation = LatLng(7.2906, 80.6328); // Default location (Kandy)
+  bool _isLoading = true;
+  final Location location = Location();
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    // Check if location services are enabled
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        _showSnackBar("Location services are disabled");
+        return;
+      }
+    }
+
+    // Request location permission
+    PermissionStatus permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        _showSnackBar("Location permission denied");
+        return;
+      }
+    }
+
+    // Initial location fetch
+    try {
+      LocationData current = await location.getLocation();
+      setState(() {
+        _currentLocation = LatLng(current.latitude!, current.longitude!);
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error getting location: $e");
+    }
+
+    // Listen to location changes
+    location.onLocationChanged.listen((LocationData loc) {
+      if (loc.latitude != null && loc.longitude != null) {
+        setState(() {
+          _currentLocation = LatLng(loc.latitude!, loc.longitude!);
+        });
+      }
+    });
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +76,23 @@ class _MappageState extends State<Mappage> {
         title: const Text("Map"),
         centerTitle: true,
       ),
-      body: GoogleMap(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: _center,
+          target: _currentLocation,
           zoom: 13,
         ),
         markers: {
           Marker(
-            markerId: MarkerId("currentLocation"),
+            markerId: const MarkerId("currentLocation"),
             icon: BitmapDescriptor.defaultMarker,
-            position: _currentLocation, // Set the position for the marker
+            position: _currentLocation,
+          ),
+          const Marker(
+            markerId: MarkerId("sourceLocation"),
+            icon: BitmapDescriptor.defaultMarker,
+            position: LatLng(7.2906, 80.6328), // Example fixed source
           ),
         },
       ),
@@ -39,32 +101,26 @@ class _MappageState extends State<Mappage> {
   }
 
   Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: 3, // Assuming Map is the 3rd index
+    return CustomBottomNavBar(
+      currentIndex: 3, // Index for Map tab
       onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          );
-        } else if (index == 1) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => SearchPage()),
-          );
+        switch (index) {
+          case 0:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+            break;
+          case 1:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const SearchPage()),
+            );
+            break;
+        // You can add navigation logic for Ticket and Profile if needed
         }
-        // Add other navigation options as needed
       },
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey[600],
-      backgroundColor: Colors.white,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-        BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: "Ticket"),
-        BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-      ],
+
     );
   }
 }

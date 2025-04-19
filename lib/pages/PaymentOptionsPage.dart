@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mobitix/widgets/CustomBottomNavBar.dart';
+import 'HomePage.dart';
+import 'SearchPage.dart';
+import 'MapPage.dart';
+
 
 class PaymentOptionsPage extends StatelessWidget {
   final int totalAmount;
@@ -43,6 +48,27 @@ class PaymentOptionsPage extends StatelessWidget {
             _buildPaymentOption(context, "eZcash"),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 2, // Assuming this is the index for Payment Options
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => SearchPage()),
+            );
+          } else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Mappage()),
+            );
+          }
+        },
       ),
     );
   }

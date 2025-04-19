@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'PaymentOptionsPage.dart';
-
+import 'SearchPage.dart';
+import 'HomePage.dart';
+import 'MapPage.dart';
+import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 class SeatDetailsPage extends StatefulWidget {
   final List<String> selectedSeats;
 
@@ -24,101 +27,122 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
     int totalPrice = widget.selectedSeats.length * seatPrice;
 
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
         title: const Text('Seat Details'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Seats Selected:", style: Theme.of(context).textTheme.titleMedium),
-            Wrap(
-              spacing: 8,
-              children: widget.selectedSeats.map((seat) => Chip(label: Text(seat))).toList(),
-            ),
-            const SizedBox(height: 12),
-            Text("Total: $totalPrice LKR", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const Divider(height: 24),
+    centerTitle: true,
+    ),
+    body: SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Text("Seats Selected:", style: Theme.of(context).textTheme.titleMedium),
+    Wrap(
+    spacing: 8,
+    children: widget.selectedSeats.map((seat) => Chip(label: Text(seat))).toList(),
+    ),
+    const SizedBox(height: 12),
+    Text("Total: $totalPrice LKR", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+    const Divider(height: 24),
 
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: "Passenger Name",
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: mobileController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: "Mobile Number",
-                prefixIcon: Icon(Icons.phone),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                prefixIcon: Icon(Icons.email),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: boardingController,
-              decoration: const InputDecoration(
-                labelText: "Boarding Point",
-                prefixIcon: Icon(Icons.location_on),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: destinationController,
-              decoration: const InputDecoration(
-                labelText: "Destination Point",
-                prefixIcon: Icon(Icons.flag),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
+    TextField(
+    controller: nameController,
+    decoration: const InputDecoration(
+    labelText: "Passenger Name",
+    prefixIcon: Icon(Icons.person),
+    border: OutlineInputBorder(),
+    ),
+    ),
+    const SizedBox(height: 12),
+    TextField(
+    controller: mobileController,
+    keyboardType: TextInputType.phone,
+    decoration: const InputDecoration(
+    labelText: "Mobile Number",
+    prefixIcon: Icon(Icons.phone),
+    border: OutlineInputBorder(),
+    ),
+    ),
+    const SizedBox(height: 12),
+    TextField(
+    controller: emailController,
+    keyboardType: TextInputType.emailAddress,
+    decoration: const InputDecoration(
+    labelText: "Email",
+    prefixIcon: Icon(Icons.email),
+    border: OutlineInputBorder(),
+    ),
+    ),
+    const SizedBox(height: 12),
+    TextField(
+    controller: boardingController,
+    decoration: const InputDecoration(
+    labelText: "Boarding Point",
+    prefixIcon: Icon(Icons.location_on),
+    border: OutlineInputBorder(),
+    ),
+    ),
+    const SizedBox(height: 12),
+    TextField(
+    controller: destinationController,
+    decoration: const InputDecoration(
+    labelText: "Destination Point",
+    prefixIcon: Icon(Icons.flag),
+    border: OutlineInputBorder(),
+    ),
+    ),
+    const SizedBox(height: 24),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.payment),
-                label: const Text("Continue to Pay"),
-                onPressed: () {
-                  // Validate and navigate to payment
-                  if (_validateFields()) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PaymentOptionsPage(
-                          totalAmount: totalPrice,
-                          seats: widget.selectedSeats,
-                          passengerName: nameController.text,
-                          mobile: mobileController.text,
-                          email: emailController.text,
-                          boarding: boardingController.text,
-                          destination: destinationController.text,
-                        ),
-                      ),
-                    );
-                  }
-                },
-              ),
-            )
-          ],
-        ),
-      ),
+    SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+    icon: const Icon(Icons.payment),
+    label: const Text("Continue to Pay"),
+    onPressed: () {
+    // Validate and navigate to payment
+    if (_validateFields()) {
+    Navigator.push(
+    context,
+    MaterialPageRoute(
+    builder: (context) => PaymentOptionsPage(
+    totalAmount: totalPrice,
+    seats: widget.selectedSeats,
+    passengerName: nameController.text,
+    mobile: mobileController.text,
+    email: emailController.text,
+    boarding: boardingController.text,
+    destination: destinationController.text,
+    ),
+    ),
+    );
+    }
+    },
+    ),
+    )
+    ],
+    ),
+    ),
+    bottomNavigationBar: CustomBottomNavBar(
+    currentIndex: 2, // Assuming this is the index for Seat Details
+    onTap: (index) {
+    if (index == 0) {
+    Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => HomePage()),
+    );
+    } else if (index == 1) {
+    Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => SearchPage()),
+    );
+    } else if (index == 3) {
+    Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => Mappage()),
+    );
+    }
+    },
+    ),
     );
   }
 

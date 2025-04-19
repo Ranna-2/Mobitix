@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobitix/pages/HomePage.dart';
 import 'package:mobitix/pages/SearchPage.dart';
 import 'package:mobitix/pages/SeatDetailsPage.dart';
+import 'package:mobitix/widgets/CustomBottomNavBar.dart';
+import 'MapPage.dart';
 
 class SeatSelectionPage extends StatefulWidget {
   final String busId;
@@ -44,7 +46,27 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1, // Assuming this is the index for Seat Selection
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => SearchPage()),
+            );
+          } else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Mappage()),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -203,35 +225,6 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
         },
         child: const Text('CONTINUE'),
       ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          );
-        } else if (index == 1) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => SearchPage()),
-          );
-        }
-      },
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey[600],
-      backgroundColor: Colors.white,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-        BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: "Ticket"),
-        BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-      ],
     );
   }
 }
