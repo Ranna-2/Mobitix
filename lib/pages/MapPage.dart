@@ -114,7 +114,7 @@ class _MappageState extends State<Mappage> {
           case 1:
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const SearchPage()),
+              MaterialPageRoute(builder: (context) =>  SearchPage()),
             );
             break;
         // You can add navigation logic for Ticket and Profile if needed

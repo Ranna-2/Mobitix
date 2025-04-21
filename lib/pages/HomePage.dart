@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'SearchPage.dart'; // Import the SearchPage
+import 'SearchPage.dart';
 import 'MapPage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 
@@ -8,13 +8,21 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryColor = Colors.blueAccent;
+    final Color backgroundColor = Colors.grey.shade100;
+    final TextEditingController fromController = TextEditingController();
+    final TextEditingController toController = TextEditingController();
+
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text("Mobitix"),
+        title: Text("Mobitix", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
+        backgroundColor: primaryColor,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -22,77 +30,108 @@ class HomePage extends StatelessWidget {
             Container(
               height: 150,
               width: double.infinity,
-              color: Colors.grey[300],
-              child: Center(child: Text("BANNER", style: TextStyle(fontSize: 20))),
+              decoration: BoxDecoration(
+                color: primaryColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Text(
+                  "BANNER",
+                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 24),
 
             // "Where are you going?" Section
-            Text("Where are you going?", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
-            // From field
-            TextField(
-              decoration: InputDecoration(
-                labelText: "From...",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.location_on),
-              ),
-            ),
-            SizedBox(height: 10),
-            // To field
-            TextField(
-              decoration: InputDecoration(
-                labelText: "To...",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.flag),
-              ),
-            ),
-            SizedBox(height: 10),
+            Text("Where are you going?",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            SizedBox(height: 12),
 
-            // Search Buses Button
+            _buildRoundedInputField("From...", Icons.location_on, fromController),
+            SizedBox(height: 12),
+            _buildRoundedInputField("To...", Icons.flag, toController),
+            SizedBox(height: 12),
+
+            // Search Buses Button + Filter
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text("SEARCH BUSES"),
+                    onPressed: () {
+                      if (fromController.text.isEmpty || toController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Please enter both departure and destination")),
+                        );
+                        return;
+                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchPage(
+                            initialFrom: fromController.text,
+                            initialTo: toController.text,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text("SEARCH BUSES", style: TextStyle(fontSize: 16)),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.filter_alt),
-                  onPressed: () {
-                    // Filter action
-                  },
-                )
+                SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.filter_alt, color: primaryColor),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SearchPage()),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 28),
 
             // Upcoming Trips
-            Text("Upcoming Trips!", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
-            Card(
-              elevation: 3,
-              child: ListTile(
-                title: Text("Bus Details - CARD 1"),
-                trailing: ElevatedButton(
-                  onPressed: () {},
-                  child: Text("VIEW TICKET"),
-                ),
-              ),
-            ),
+            Text("Upcoming Trips!",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            SizedBox(height: 12),
 
-            SizedBox(height: 20),
+            _buildTripCard(context, "Colombo → Kandy", "9:00 AM • AC Bus"),
+            _buildTripCard(context, "Kandy → Jaffna", "1:00 PM • Luxury Bus"),
+
+            SizedBox(height: 28),
 
             // Promotions & Offers
-            Text("Promotions & Offers", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
+            Text("Promotions & Offers",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            SizedBox(height: 12),
+
             Container(
               height: 150,
               width: double.infinity,
-              color: Colors.blue[100],
-              child: Center(child: Text("PROMO BANNER")),
+              decoration: BoxDecoration(
+                color: Colors.orangeAccent,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Text(
+                  "🎉 20% Off on First Booking!",
+                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ],
         ),
@@ -100,28 +139,68 @@ class HomePage extends StatelessWidget {
 
       // Bottom Navigation Bar
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 0, // Home selected
+        currentIndex: 0,
         onTap: (index) {
           if (index == 0) {
-            // Home tab
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
           } else if (index == 1) {
-            // Search tab
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => SearchPage()),
-            );
-          }
-          else if (index == 3) { // Assuming Map is the 3rd index
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => Mappage()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
+          } else if (index == 3) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildRoundedInputField(String label, IconData icon, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.blueGrey.shade100),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.blueAccent),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTripCard(BuildContext context, String route, String details) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
+      margin: EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: Icon(Icons.directions_bus, color: Colors.blueAccent),
+        title: Text(route, style: TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text(details),
+        trailing: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SearchPage(
+                  initialFrom: route.split("→")[0].trim(),
+                  initialTo: route.split("→")[1].trim(),
+                ),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: Text("VIEW", style: TextStyle(color: Colors.white)),
+        ),
       ),
     );
   }

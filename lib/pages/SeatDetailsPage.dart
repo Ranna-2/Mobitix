@@ -4,6 +4,7 @@ import 'SearchPage.dart';
 import 'HomePage.dart';
 import 'MapPage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
+
 class SeatDetailsPage extends StatefulWidget {
   final List<String> selectedSeats;
 
@@ -20,129 +21,125 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
   final TextEditingController boardingController = TextEditingController();
   final TextEditingController destinationController = TextEditingController();
 
-  int seatPrice = 500; // Example price per seat in LKR
+  int seatPrice = 500;
 
   @override
   Widget build(BuildContext context) {
     int totalPrice = widget.selectedSeats.length * seatPrice;
 
     return Scaffold(
-        appBar: AppBar(
-        title: const Text('Seat Details'),
-    centerTitle: true,
-    ),
-    body: SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text("Seats Selected:", style: Theme.of(context).textTheme.titleMedium),
-    Wrap(
-    spacing: 8,
-    children: widget.selectedSeats.map((seat) => Chip(label: Text(seat))).toList(),
-    ),
-    const SizedBox(height: 12),
-    Text("Total: $totalPrice LKR", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-    const Divider(height: 24),
+      appBar: AppBar(
+        title: const Text('Passenger Details'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Trip summary section
+            Card(
+              color: Colors.blue.shade50,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Trip Summary", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      children: widget.selectedSeats.map((seat) => Chip(label: Text(seat))).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    Text("Total: $totalPrice LKR", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
 
-    TextField(
-    controller: nameController,
-    decoration: const InputDecoration(
-    labelText: "Passenger Name",
-    prefixIcon: Icon(Icons.person),
-    border: OutlineInputBorder(),
-    ),
-    ),
-    const SizedBox(height: 12),
-    TextField(
-    controller: mobileController,
-    keyboardType: TextInputType.phone,
-    decoration: const InputDecoration(
-    labelText: "Mobile Number",
-    prefixIcon: Icon(Icons.phone),
-    border: OutlineInputBorder(),
-    ),
-    ),
-    const SizedBox(height: 12),
-    TextField(
-    controller: emailController,
-    keyboardType: TextInputType.emailAddress,
-    decoration: const InputDecoration(
-    labelText: "Email",
-    prefixIcon: Icon(Icons.email),
-    border: OutlineInputBorder(),
-    ),
-    ),
-    const SizedBox(height: 12),
-    TextField(
-    controller: boardingController,
-    decoration: const InputDecoration(
-    labelText: "Boarding Point",
-    prefixIcon: Icon(Icons.location_on),
-    border: OutlineInputBorder(),
-    ),
-    ),
-    const SizedBox(height: 12),
-    TextField(
-    controller: destinationController,
-    decoration: const InputDecoration(
-    labelText: "Destination Point",
-    prefixIcon: Icon(Icons.flag),
-    border: OutlineInputBorder(),
-    ),
-    ),
-    const SizedBox(height: 24),
+            const Text("Passenger Information", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
 
-    SizedBox(
-    width: double.infinity,
-    child: ElevatedButton.icon(
-    icon: const Icon(Icons.payment),
-    label: const Text("Continue to Pay"),
-    onPressed: () {
-    // Validate and navigate to payment
-    if (_validateFields()) {
-    Navigator.push(
-    context,
-    MaterialPageRoute(
-    builder: (context) => PaymentOptionsPage(
-    totalAmount: totalPrice,
-    seats: widget.selectedSeats,
-    passengerName: nameController.text,
-    mobile: mobileController.text,
-    email: emailController.text,
-    boarding: boardingController.text,
-    destination: destinationController.text,
-    ),
-    ),
+            _buildTextField(controller: nameController, label: "Full Name", icon: Icons.person),
+            _buildTextField(controller: mobileController, label: "Mobile Number", icon: Icons.phone, inputType: TextInputType.phone),
+            _buildTextField(controller: emailController, label: "Email", icon: Icons.email, inputType: TextInputType.emailAddress),
+
+            const SizedBox(height: 20),
+            const Text("Travel Information", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+
+            _buildTextField(controller: boardingController, label: "Boarding Point", icon: Icons.location_on),
+            _buildTextField(controller: destinationController, label: "Destination Point", icon: Icons.flag),
+
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.payment),
+                label: const Text("Continue to Pay"),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  backgroundColor: Colors.teal,
+                  textStyle: const TextStyle(fontSize: 20),
+                ),
+                onPressed: () {
+                  if (_validateFields()) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PaymentOptionsPage(
+                          totalAmount: totalPrice,
+                          seats: widget.selectedSeats,
+                          passengerName: nameController.text,
+                          mobile: mobileController.text,
+                          email: emailController.text,
+                          boarding: boardingController.text,
+                          destination: destinationController.text,
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 2,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+          } else if (index == 1) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SearchPage()));
+          } else if (index == 3) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Mappage()));
+          }
+        },
+      ),
     );
-    }
-    },
-    ),
-    )
-    ],
-    ),
-    ),
-    bottomNavigationBar: CustomBottomNavBar(
-    currentIndex: 2, // Assuming this is the index for Seat Details
-    onTap: (index) {
-    if (index == 0) {
-    Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => HomePage()),
-    );
-    } else if (index == 1) {
-    Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => SearchPage()),
-    );
-    } else if (index == 3) {
-    Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => Mappage()),
-    );
-    }
-    },
-    ),
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType inputType = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: controller,
+        keyboardType: inputType,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
     );
   }
 
@@ -158,41 +155,5 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
       return false;
     }
     return true;
-  }
-}
-
-class PaymentPage extends StatelessWidget {
-  final int totalAmount;
-  final List<String> seats;
-  final String passengerName;
-  final String mobile;
-  final String email;
-  final String boarding;
-  final String destination;
-
-  const PaymentPage({
-    Key? key,
-    required this.totalAmount,
-    required this.seats,
-    required this.passengerName,
-    required this.mobile,
-    required this.email,
-    required this.boarding,
-    required this.destination,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // This is just a placeholder screen
-    return Scaffold(
-      appBar: AppBar(title: const Text("Payment")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          "Proceeding to payment of $totalAmount LKR for seats: ${seats.join(", ")}\n"
-              "Passenger: $passengerName\nBoarding: $boarding\nDestination: $destination",
-        ),
-      ),
-    );
   }
 }

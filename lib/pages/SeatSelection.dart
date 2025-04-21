@@ -21,6 +21,7 @@ class SeatSelectionPage extends StatefulWidget {
 
 class _SeatSelectionPageState extends State<SeatSelectionPage> {
   final Set<int> selectedSeats = {};
+  final double seatPrice = 500.00;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
       appBar: AppBar(
         title: const Text('Select Seats'),
         centerTitle: true,
+        backgroundColor: Colors.blueAccent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -42,28 +44,21 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             const SizedBox(height: 20),
             _buildPassengerDetails(),
             const SizedBox(height: 20),
+            _buildPriceSummary(),
+            const SizedBox(height: 10),
             _buildContinueButton(),
           ],
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1, // Assuming this is the index for Seat Selection
+        currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
           } else if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => SearchPage()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
           } else if (index == 3) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => Mappage()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
           }
         },
       ),
@@ -72,9 +67,10 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
 
   Widget _buildBusHeader() {
     return Card(
-      elevation: 2,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -82,15 +78,16 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(widget.busName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
                 const Text('Departure: 08:00 AM'),
                 const Text('Arrival: 12:30 PM'),
               ],
             ),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text('LKR 500.00'),
-                Text('per seat'),
+              children: const [
+                Text('LKR 500.00', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('per seat', style: TextStyle(fontSize: 12)),
               ],
             ),
           ],
@@ -102,15 +99,15 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
   Widget _buildSeatGrid() {
     return Column(
       children: [
-        const Text('Front', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text('FRONT', style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
             childAspectRatio: 1,
           ),
           itemCount: 52,
@@ -118,9 +115,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             if (index == 2 || (index >= 44 && index <= 45)) {
               return const SizedBox.shrink();
             }
-
-            int seatNumber = index + 1;
-            return _buildSeatItem(seatNumber);
+            return _buildSeatItem(index + 1);
           },
         ),
       ],
@@ -136,22 +131,22 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
           ? null
           : () {
         setState(() {
-          if (isSelected) {
-            selectedSeats.remove(seatNumber);
-          } else {
-            selectedSeats.add(seatNumber);
-          }
+          isSelected ? selectedSeats.remove(seatNumber) : selectedSeats.add(seatNumber);
         });
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: isOccupied
               ? Colors.grey
               : isSelected
-              ? Colors.blue
+              ? Colors.blueAccent
               : Colors.white,
-          border: Border.all(color: isOccupied ? Colors.grey : Colors.blue),
+          border: Border.all(color: isOccupied ? Colors.grey.shade700 : Colors.blueAccent),
           borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected
+              ? [BoxShadow(color: Colors.blue.withOpacity(0.4), blurRadius: 4, offset: const Offset(0, 2))]
+              : [],
         ),
         child: Center(
           child: Text(
@@ -171,7 +166,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildLegendItem(Colors.white, 'Available'),
-        _buildLegendItem(Colors.blue, 'Selected'),
+        _buildLegendItem(Colors.blueAccent, 'Selected'),
         _buildLegendItem(Colors.grey, 'Booked'),
       ],
     );
@@ -185,12 +180,12 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
           height: 20,
           decoration: BoxDecoration(
             color: color,
-            border: Border.all(color: Colors.blue),
+            border: Border.all(color: Colors.blueAccent),
             borderRadius: BorderRadius.circular(4),
           ),
         ),
         const SizedBox(width: 6),
-        Text(label),
+        Text(label, style: const TextStyle(fontSize: 13)),
       ],
     );
   }
@@ -202,10 +197,27 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
     );
   }
 
+  Widget _buildPriceSummary() {
+    double totalPrice = selectedSeats.length * seatPrice;
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Text(
+        'Total: LKR ${totalPrice.toStringAsFixed(2)}',
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
   Widget _buildContinueButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      height: 50,
+      child: ElevatedButton.icon(
+        icon: const Icon(Icons.arrow_forward),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blueAccent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
         onPressed: () {
           if (selectedSeats.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -223,7 +235,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             ),
           );
         },
-        child: const Text('CONTINUE'),
+        label: const Text('Continue', style: TextStyle(fontSize: 16)),
       ),
     );
   }
