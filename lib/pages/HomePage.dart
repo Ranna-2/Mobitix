@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'SearchPage.dart';
 import 'MapPage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
+import 'ProfilePage.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -147,6 +148,9 @@ class HomePage extends StatelessWidget {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
           } else if (index == 3) {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
+          }
+          else if (index == 4) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
           }
         },
       ),

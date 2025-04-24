@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'HomePage.dart';
 import 'SeatSelection.dart';
 import 'MapPage.dart';
+import 'ProfilePage.dart';
+import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:mobitix/model/bus.dart';
+import 'package:intl/intl.dart';
 
 class SearchPage extends StatefulWidget {
   final String? initialFrom;
   final String? initialTo;
 
-  const SearchPage({this.initialFrom, this.initialTo, Key? key}) : super(key: key);
+  const SearchPage({this.initialFrom, this.initialTo, Key? key})
+      : super(key: key);
 
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -22,18 +26,31 @@ class _SearchPageState extends State<SearchPage> {
   List<Bus> buses = [];
   bool isLoading = false;
   bool hasSearched = false;
+  DateTime? selectedDate;
+  List<DateTime> availableDates = [];
+  final DateFormat dateFormat = DateFormat('MMM');
+  final DateFormat dayFormat = DateFormat('d');
+  final DateFormat weekdayFormat = DateFormat('E');
 
   @override
   void initState() {
     super.initState();
     fromController = TextEditingController(text: widget.initialFrom ?? '');
     toController = TextEditingController(text: widget.initialTo ?? '');
+    _initializeDates();
 
     if (widget.initialFrom != null && widget.initialTo != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _performSearch();
       });
     }
+  }
+
+  void _initializeDates() {
+    final now = DateTime.now();
+    availableDates =
+        List.generate(7, (index) => now.add(Duration(days: index)));
+    selectedDate = availableDates.first;
   }
 
   @override
@@ -43,21 +60,22 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  Future<List<Bus>> fetchBuses(String from, String to) async {
+  Future<List<Bus>> fetchBuses(String from, String to, DateTime date) async {
     try {
       setState(() => isLoading = true);
 
-      final response = await http.get(
-        Uri.parse('http://192.168.1.7/mobitix/fetch_buses.php?from=$from&to=$to'),
-      ).timeout(Duration(seconds: 10));
+      final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+
+      final response = await http
+          .get(
+            Uri.parse(
+                'http://192.168.1.7/mobitix/fetch_buses.php?from=$from&to=$to&date=$formattedDate'),
+          )
+          .timeout(Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         List jsonResponse = json.decode(response.body);
-        return jsonResponse
-            .map((bus) => Bus.fromJson(bus))
-            .where((bus) => bus.route.toLowerCase().contains(from.toLowerCase()) &&
-            bus.route.toLowerCase().contains(to.toLowerCase()))
-            .toList();
+        return jsonResponse.map((bus) => Bus.fromJson(bus)).toList();
       } else {
         throw Exception('Failed to load buses. Status: ${response.statusCode}');
       }
@@ -79,9 +97,15 @@ class _SearchPageState extends State<SearchPage> {
       );
       return;
     }
+    if (selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please select a date")),
+      );
+      return;
+    }
 
     try {
-      final results = await fetchBuses(from, to);
+      final results = await fetchBuses(from, to, selectedDate!);
       setState(() {
         buses = results;
         hasSearched = true;
@@ -89,7 +113,9 @@ class _SearchPageState extends State<SearchPage> {
 
       if (buses.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("No buses found for this route")),
+          SnackBar(
+              content: Text(
+                  "No buses found for this route on ${DateFormat('MMM,d,y').format(selectedDate!)}")),
         );
       }
     } catch (e) {
@@ -100,7 +126,8 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   // Helper method to build input fields
-  Widget _buildInputField(String hint, IconData icon, TextEditingController controller) {
+  Widget _buildInputField(
+      String hint, IconData icon, TextEditingController controller) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -123,41 +150,83 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   // Helper method to create date cards
-  Widget _dateCard(String month, String day, String weekday) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      padding: EdgeInsets.all(8),
-      width: 70,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.blueGrey.shade100),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(month,
+  Widget _dateCard(DateTime date) {
+    final isSelected = selectedDate != null &&
+        date.year == selectedDate!.year &&
+        date.month == selectedDate!.month &&
+        date.day == selectedDate!.day;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedDate = date;
+        });
+        if (hasSearched) {
+          _performSearch(); // Auto-search when date changes if we've already searched
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.all(8),
+        width: 70,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blueAccent : Colors.white,
+          border: Border.all(
+            color: isSelected ? Colors.blueAccent : Colors.blueGrey.shade100,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              dateFormat.format(date),
               style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.blueAccent)),
-          Text(day, style: TextStyle(fontSize: 18, color: Colors.black)),
-          Text(weekday,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-        ],
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : Colors.blueAccent),
+            ),
+            Text(
+              dayFormat.format(date),
+              style: TextStyle(
+                fontSize: 18,
+                color: isSelected ? Colors.white : Colors.black,
+              ),
+            ),
+            Text(
+              weekdayFormat.format(date),
+              style: TextStyle(
+                fontSize: 12,
+                color: isSelected ? Colors.white : Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   // Helper method to create quick date buttons
-  Widget _quickDateButton(String label) {
+  Widget _quickDateButton(String label, DateTime date) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        setState(() {
+          selectedDate = date;
+        });
+        if (hasSearched) {
+          _performSearch();
+        }
+      },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor:
+            selectedDate == date ? Colors.blueAccent : Colors.orangeAccent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
-      child: Text(label,
-          textAlign: TextAlign.center, style: TextStyle(color: Colors.white)),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white),
+      ),
     );
   }
 
@@ -199,9 +268,9 @@ class _SearchPageState extends State<SearchPage> {
               SizedBox(height: 8),
               Text("Route: ${bus.route}"),
               SizedBox(height: 4),
-              Text("Departure: ${bus.departureTime}"),
+              Text("Departure: ${bus.formattedDeparture.isNotEmpty ? bus.formattedDeparture : bus.departureTime}"),
               SizedBox(height: 4),
-              Text("Arrival: ${bus.arrivalTime}"),
+              Text("Arrival: ${bus.formattedArrival.isNotEmpty ? bus.formattedArrival : bus.arrivalTime}"),
               SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -277,7 +346,8 @@ class _SearchPageState extends State<SearchPage> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
-                child: Text("VIEW SEATS", style: TextStyle(color: Colors.white)),
+                child:
+                    Text("VIEW SEATS", style: TextStyle(color: Colors.white)),
               ),
             ),
           )
@@ -294,7 +364,8 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text('Search Buses', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Search Buses',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: primaryColor,
         elevation: 0,
@@ -318,7 +389,8 @@ class _SearchPageState extends State<SearchPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Search Section
-            Text("Where are you going?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text("Where are you going?",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             SizedBox(height: 12),
             _buildInputField("From...", Icons.location_on, fromController),
             SizedBox(height: 12),
@@ -329,35 +401,40 @@ class _SearchPageState extends State<SearchPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text("Sort By", style: TextStyle(fontSize: 14, color: Colors.grey[700], fontWeight: FontWeight.w500)),
+                Text("Sort By",
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500)),
                 SizedBox(width: 8),
                 Icon(Icons.arrow_upward, color: primaryColor),
                 Icon(Icons.arrow_downward, color: primaryColor),
               ],
             ),
             SizedBox(height: 20),
-            Text("Pick a Date", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text("Pick a Date",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             SizedBox(height: 12),
             SizedBox(
               height: 100,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                children: [
-                  _dateCard("Feb", "27", "Thu"),
-                  _dateCard("Feb", "28", "Fri"),
-                  _dateCard("Mar", "01", "Sat"),
-                  _dateCard("Mar", "02", "Sun"),
-                  _dateCard("Mar", "03", "Mon"),
-                ],
+                children:
+                    availableDates.map((date) => _dateCard(date)).toList(),
               ),
             ),
             SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _quickDateButton("Today\n27 Feb"),
-                _quickDateButton("Tomorrow\n28 Feb"),
-                _quickDateButton("Next Month\nMar"),
+                _quickDateButton(
+                    "Today\n${DateFormat('MMM d').format(DateTime.now())}",
+                    DateTime.now()),
+                _quickDateButton(
+                    "Tomorrow\n${DateFormat('MMM d').format(DateTime.now().add(Duration(days: 1)))}",
+                    DateTime.now().add(Duration(days: 1))),
+                _quickDateButton(
+                    "Next Week", DateTime.now().add(Duration(days: 7))),
               ],
             ),
             SizedBox(height: 24),
@@ -370,14 +447,16 @@ class _SearchPageState extends State<SearchPage> {
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 14),
                   backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
                 child: isLoading
                     ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2),
+                      )
                     : Text('SEARCH BUSES', style: TextStyle(fontSize: 16)),
               ),
             ),
@@ -395,30 +474,28 @@ class _SearchPageState extends State<SearchPage> {
               else if (buses.isNotEmpty)
                 ...buses.map((bus) => _buildBusCard(context, bus)).toList(),
             ] else ...[
-              Text("Available Buses", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text("Available Buses",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
               SizedBox(height: 12),
               _buildBusDetailCard(context),
             ],
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 0,
         onTap: (index) {
-          if (index == 0) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
-          if (index == 1) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
-          if (index == 3) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
+          if (index == 0) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+          } else if (index == 1) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
+          } else if (index == 3) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
+          }
+          else if (index == 4) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+          }
         },
-        selectedItemColor: primaryColor,
-        unselectedItemColor: Colors.grey[600],
-        backgroundColor: Colors.white,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: "Ticket"),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
       ),
     );
   }

@@ -24,9 +24,9 @@ class _LandingPageState extends State<LandingPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(30),
                   child: Image.asset(
-                    "images/landingpage.png", // Update to your Mobitix image
+                    "images/icon/app_icon1.png", // Update to your Mobitix image
                     width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height / 1.5,
+                    height: MediaQuery.of(context).size.height / 2,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -37,7 +37,7 @@ class _LandingPageState extends State<LandingPage> {
               Text(
                 "Book Your Bus Tickets\n     with Mobitix!",
                 style: TextStyle(
-                    color: Colors.green,
+                    color: Colors.deepOrange,
                     fontSize: 26.0,
                     fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
@@ -73,7 +73,7 @@ class _LandingPageState extends State<LandingPage> {
                       width: MediaQuery.of(context).size.width / 1.2,
                       padding: EdgeInsets.symmetric(vertical: 15.0),
                       decoration: BoxDecoration(
-                          color: Colors.green,
+                          color: Colors.blueAccent,
                           borderRadius: BorderRadius.circular(30)),
                       child: Center(
                         child: Text(
@@ -100,7 +100,7 @@ class _LandingPageState extends State<LandingPage> {
                 child: Text(
                   "Already have an account? Log in!",
                   style: TextStyle(
-                    color: Colors.green,
+                    color: Colors.deepOrange,
                     fontSize: 16.0,
                     fontWeight: FontWeight.w500,
                   ),

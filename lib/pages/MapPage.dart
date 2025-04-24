@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'HomePage.dart';
-import 'SearchPage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
+import 'HomePage.dart';
+import 'ProfilePage.dart';
+import 'SearchPage.dart';
+
+
 
 class Mappage extends StatefulWidget {
   const Mappage({super.key});
@@ -13,60 +18,108 @@ class Mappage extends StatefulWidget {
 }
 
 class _MappageState extends State<Mappage> {
-  LatLng _currentLocation = LatLng(7.2906, 80.6328); // Default location (Kandy)
+  LatLng _currentLocation = LatLng(7.2906, 80.6328); // Default location
   bool _isLoading = true;
-  final Location location = Location();
+  final Location _location = Location();
+  Set<Marker> _markers = {};
+  String busId = "bus7";
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+    // Fetch bus locations every 10 seconds
+    Future.delayed(Duration(seconds: 10), () {
+      _fetchBusLocations();
+    });
   }
 
   Future<void> _getCurrentLocation() async {
-    // Check if location services are enabled
-    bool serviceEnabled = await location.serviceEnabled();
+    bool serviceEnabled = await _location.serviceEnabled();
     if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
+      serviceEnabled = await _location.requestService();
       if (!serviceEnabled) {
-        _showSnackBar("Location services are disabled");
         return;
       }
     }
 
-    // Request location permission
-    PermissionStatus permissionGranted = await location.hasPermission();
+    PermissionStatus permissionGranted = await _location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
+      permissionGranted = await _location.requestPermission();
       if (permissionGranted != PermissionStatus.granted) {
-        _showSnackBar("Location permission denied");
         return;
       }
     }
 
-    // Initial location fetch
     try {
-      LocationData current = await location.getLocation();
+      LocationData currentLocation = await _location.getLocation();
       setState(() {
-        _currentLocation = LatLng(current.latitude!, current.longitude!);
+        _currentLocation = LatLng(currentLocation.latitude!, currentLocation.longitude!);
         _isLoading = false;
+        _markers.add(Marker(
+          markerId: MarkerId("currentLocation"),
+          position: _currentLocation,
+          infoWindow: InfoWindow(title: "Your Location"),
+        ));
       });
+
+      // Send the current location to the server
+      _sendLocationToServer(currentLocation.latitude!, currentLocation.longitude!);
     } catch (e) {
       print("Error getting location: $e");
     }
 
     // Listen to location changes
-    location.onLocationChanged.listen((LocationData loc) {
+    _location.onLocationChanged.listen((LocationData loc) {
       if (loc.latitude != null && loc.longitude != null) {
         setState(() {
           _currentLocation = LatLng(loc.latitude!, loc.longitude!);
+          _markers.add(Marker(
+            markerId: MarkerId("currentLocation"),
+            position: _currentLocation,
+            infoWindow: InfoWindow(title: "Your Location"),
+          ));
         });
+
+        // Send updated location to the server
+        _sendLocationToServer(loc.latitude!, loc.longitude!);
       }
     });
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  Future<void> _sendLocationToServer(double latitude, double longitude) async {
+    final String url = 'http://localhost/mobitix/location.php'; // Update with your server URL
+    try {
+      await http.post(Uri.parse(url), body: {
+        'busId': busId,
+        'latitude': latitude.toString(),
+        'longitude': longitude.toString(),
+      });
+    } catch (e) {
+      print("Error sending location to server: $e");
+    }
+  }
+
+  Future<void> _fetchBusLocations() async {
+    final String url = 'http://localhost/mobitix/location.php'; // Update with your server URL
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> locations = json.decode(response.body);
+        setState(() {
+          _markers.clear(); // Clear existing markers
+          locations.forEach((busId, location) {
+            _markers.add(Marker(
+              markerId: MarkerId(busId),
+              position: LatLng(double.parse(location['latitude']), double.parse(location['longitude'])),
+              infoWindow: InfoWindow(title: "Bus $busId"),
+            ));
+          });
+        });
+      }
+    } catch (e) {
+      print("Error fetching bus locations: $e");
+    }
   }
 
   @override
@@ -83,44 +136,24 @@ class _MappageState extends State<Mappage> {
           target: _currentLocation,
           zoom: 13,
         ),
-        markers: {
-          Marker(
-            markerId: const MarkerId("currentLocation"),
-            icon: BitmapDescriptor.defaultMarker,
-            position: _currentLocation,
-          ),
-          const Marker(
-            markerId: MarkerId("sourceLocation"),
-            icon: BitmapDescriptor.defaultMarker,
-            position: LatLng(7.2906, 80.6328), // Example fixed source
-          ),
+        markers: _markers,
+      ),
+
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 0,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+          } else if (index == 1) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
+          } else if (index == 3) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
+          }
+          else if (index == 4) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+          }
         },
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return CustomBottomNavBar(
-      currentIndex: 3, // Index for Map tab
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-            break;
-          case 1:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) =>  SearchPage()),
-            );
-            break;
-        // You can add navigation logic for Ticket and Profile if needed
-        }
-      },
-
     );
   }
 }

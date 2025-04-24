@@ -4,6 +4,7 @@ import 'package:mobitix/pages/SearchPage.dart';
 import 'package:mobitix/pages/SeatDetailsPage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 import 'MapPage.dart';
+import 'ProfilePage.dart';
 
 class SeatSelectionPage extends StatefulWidget {
   final String busId;
@@ -51,7 +52,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1,
+        currentIndex: 0,
         onTap: (index) {
           if (index == 0) {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
@@ -59,6 +60,9 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
           } else if (index == 3) {
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
+          }
+          else if (index == 4) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
           }
         },
       ),

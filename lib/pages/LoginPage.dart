@@ -1,164 +1,305 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'HomePage.dart';
-import 'SignupPage.dart'; // Import the HomePage or relevant page
+import 'SignupPage.dart';
+import 'OtpVerificationPage.dart';
 
-class LoginPage extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  final Color primaryColor = Color(0xFFff3377);
+  final Color secondaryColor = Color(0xFF3399ff);
+  final Color accentColor = Color(0xFFff9933);
+
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  String _errorMessage = '';
+
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.1.7/mobitix/login.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text.trim(),
+        }),
+      );
+
+      final responseData = json.decode(response.body);
+
+      final success = responseData['success'] == true || responseData['success'] == 1;
+
+      if (success) {
+        final isVerified = responseData['user']?['is_verified'] == true ||
+            responseData['user']?['is_verified'] == 1;
+
+        if (isVerified) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
+      } else {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpVerificationPage(
+                email: _emailController.text.trim(),
+                isRegistration: false,
+              ),
+            ),
+          );
+        // After successful verification, login again
+        _login();
+      }
+    }
+    else {
+        setState(() {
+          _errorMessage = responseData['message'] ?? 'Login failed';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Connection error: ${e.toString().replaceAll('FormatException: ', '')}";
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-            color: Colors.black,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Color(0xFFf8e8f8)],
           ),
         ),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-      ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          "Log In",
-                          style: TextStyle(
-                              color: CupertinoColors.systemGreen,
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          "Welcome back to Mobitix!",
-                          style: TextStyle(fontSize: 15, color: Colors.grey[700]),
-                        )
-                      ],
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            children: [
+              SizedBox(height: 80),
+              // Logo and Title
+              Column(
+                children: [
+                  Icon(Icons.directions_bus, size: 60, color: primaryColor),
+                  SizedBox(height: 16),
+                  Text(
+                    'Welcome Back',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      child: Column(
-                        children: <Widget>[
-                          inputFile(label: "Email", controller: emailController),
-                          inputFile(
-                              label: "Password",
-                              obscureText: true,
-                              controller: passwordController)
-                        ],
-                      ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Login to continue your journey',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      child: Container(
-                        padding: EdgeInsets.only(top: 3, left: 3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          border: Border.all(color: Colors.black),
-                        ),
-                        child: MaterialButton(
-                          minWidth: double.infinity,
-                          height: 60,
-                          onPressed: () {
-                            // Navigate to HomePage directly for now
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) => HomePage()));
-                          },
-                          color: Colors.green,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: Text(
-                            "Log In",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 40),
+
+              // Error Message
+              if (_errorMessage.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error, color: Colors.red),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage,
+                          style: TextStyle(color: Colors.red),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+              SizedBox(height: _errorMessage.isNotEmpty ? 16 : 0),
+
+              // Form Fields
+              _buildInputField(
+                controller: _emailController,
+                label: 'Email',
+                icon: Icons.email,
+                inputType: TextInputType.emailAddress,
+              ),
+              SizedBox(height: 16),
+              _buildInputField(
+                controller: _passwordController,
+                label: 'Password',
+                icon: Icons.lock,
+                isPassword: true,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    // Forgot password functionality
+                  },
+                  child: Text(
+                    'Forgot Password?',
+                    style: TextStyle(color: secondaryColor),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+
+              // Login Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _login,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text("Don't have an account? "),
-                        GestureDetector(
-                          onTap: () {
-                            // Navigate to SignupPage (you need to create this page)
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => SignupPage()),
-                            );
-                          },
-                          child: Text(
-                            " Sign up",
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                            ),
-                          ),
-                        )
-                      ],
+                    elevation: 2,
+                  ),
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                    'LOG IN',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                )),
-          ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 32),
+
+              // Or Divider
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text('OR', style: TextStyle(color: Colors.grey)),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey)),
+                ],
+              ),
+              SizedBox(height: 24),
+
+              // Social Login (Placeholder)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.facebook, color: Color(0xFF4267B2)),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.g_mobiledata, size: 40, color: Color(0xFFDB4437)),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+              SizedBox(height: 24),
+
+              // Don't have account
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Don\'t have an account? '),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage()),
+                      );
+                    },
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        color: secondaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget inputFile(
-      {label, obscureText = false, TextEditingController? controller}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          label,
-          style: TextStyle(
-              fontSize: 15, fontWeight: FontWeight.w400, color: Colors.black87),
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType inputType = TextInputType.text,
+    bool isPassword = false,
+    Widget? suffixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword && _obscurePassword,
+      keyboardType: inputType,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: primaryColor),
+        suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-        SizedBox(
-          height: 5,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey),
-              ),
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey))),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: primaryColor, width: 2),
         ),
-        SizedBox(
-          height: 10,
-        )
-      ],
+      ),
     );
   }
 }

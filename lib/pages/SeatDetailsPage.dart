@@ -3,6 +3,7 @@ import 'PaymentOptionsPage.dart';
 import 'SearchPage.dart';
 import 'HomePage.dart';
 import 'MapPage.dart';
+import 'ProfilePage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 
 class SeatDetailsPage extends StatefulWidget {
@@ -109,14 +110,17 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 2,
+        currentIndex: 0,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
           } else if (index == 1) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SearchPage()));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
           } else if (index == 3) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Mappage()));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
+          }
+          else if (index == 4) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
           }
         },
       ),

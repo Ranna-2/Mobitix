@@ -6,23 +6,23 @@ plugins {
 
 android {
     namespace = "com.example.mobitix"
-    compileSdk = 35  // Updated from flutter.compileSdkVersion
+    compileSdk = 35 // Updated from flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = '1.8'
     }
 
     defaultConfig {
         applicationId = "com.example.mobitix"
         minSdk = 21
         targetSdk = 35  // Already correct
-        versionCode = flutter.versionCode
+        versionCode = flutter.versionCode.toInteger()
         versionName = flutter.versionName
     }
 
