@@ -1,7 +1,11 @@
-// pages/TicketsPage.dart
 import 'package:flutter/material.dart';
 import '../model/ticket.dart';
 import 'TicketConfirmationPage.dart';
+import 'HomePage.dart';
+import 'SearchPage.dart';
+import 'MapPage.dart';
+import 'ProfilePage.dart';
+import '../widgets/CustomBottomNavBar.dart';
 
 class TicketsPage extends StatefulWidget {
   const TicketsPage({Key? key}) : super(key: key);
@@ -69,6 +73,34 @@ class _TicketsPageState extends State<TicketsPage> {
             _buildTicketList(upcomingTrips),
             _buildTicketList(tripHistory),
           ],
+        ),
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: 2, // Set current index to 2 for TicketsPage
+          onTap: (index) {
+            if (index == 0) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => HomePage())
+              );
+            } else if (index == 1) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => SearchPage())
+              );
+            } else if (index == 2) {
+              // Already on TicketsPage
+            } else if (index == 3) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => Mappage())
+              );
+            } else if (index == 4) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => ProfilePage())
+              );
+            }
+          },
         ),
       ),
     );

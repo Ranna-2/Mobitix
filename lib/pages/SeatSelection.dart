@@ -22,7 +22,7 @@ class SeatSelectionPage extends StatefulWidget {
 
 class _SeatSelectionPageState extends State<SeatSelectionPage> {
   final Set<int> selectedSeats = {};
-  final double seatPrice = 500.00;
+  final double seatPrice = 1500.00;
 
   @override
   Widget build(BuildContext context) {
@@ -83,14 +83,14 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
               children: [
                 Text(widget.busName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                const Text('Departure: 08:00 AM'),
-                const Text('Arrival: 12:30 PM'),
+                const Text('Departure: 09:15 AM'),
+                const Text('Arrival: 01:15 PM'),
               ],
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: const [
-                Text('LKR 500.00', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('LKR 1500.00', style: TextStyle(fontWeight: FontWeight.bold)),
                 Text('per seat', style: TextStyle(fontSize: 12)),
               ],
             ),

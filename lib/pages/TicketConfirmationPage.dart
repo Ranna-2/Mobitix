@@ -1,9 +1,14 @@
 // pages/TicketConfirmationPage.dart
 import 'package:flutter/material.dart';
+import 'package:mobitix/pages/HomePage.dart';
+import 'package:mobitix/pages/Mappage.dart';
+import 'package:mobitix/pages/ProfilePage.dart';
+import 'package:mobitix/pages/SearchPage.dart';
 import 'package:mobitix/pages/TicketsPage.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../model/ticket.dart';
+import '../widgets/CustomBottomNavBar.dart';
 
 class TicketConfirmationPage extends StatelessWidget {
   final Ticket ticket;
@@ -47,6 +52,37 @@ class TicketConfirmationPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1, // Set current index to 2 for TicketsPage
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => HomePage())
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => SearchPage())
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const TicketsPage()),
+            );
+          } else if (index == 3) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => Mappage())
+            );
+          } else if (index == 4) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => ProfilePage())
+            );
+          }
+        },
       ),
     );
   }

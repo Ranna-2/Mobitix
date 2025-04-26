@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/services.dart';
 
 class OtpVerificationPage extends StatefulWidget {
   final String email;
@@ -26,6 +26,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   String? _generatedOtp;
   String? _sessionId;
   final http.Client _client = http.Client();
+  final _formKey = GlobalKey<FormState>();
 
   final Color primaryColor = Color(0xFFff3377);
 
@@ -37,7 +38,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     for (int i = 0; i < _focusNodes.length; i++) {
       _focusNodes[i].addListener(() {
         if (!_focusNodes[i].hasFocus && _otpControllers[i].text.isEmpty && i > 0) {
-          FocusScope.of(context).requestFocus(_focusNodes[i-1]);
+          FocusScope.of(context).requestFocus(_focusNodes[i - 1]);
         }
       });
     }
@@ -207,6 +208,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         return false;
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text('OTP Verification'),
           backgroundColor: primaryColor,
@@ -217,125 +219,134 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
             },
           ),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height -
-                  kToolbarHeight -
-                  MediaQuery.of(context).padding.top,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Enter the 6-digit code sent to',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                    ),
-                    Text(
-                      widget.email,
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(6, (index) {
-                        return SizedBox(
-                          width: 45,
-                          child: TextField(
-                            controller: _otpControllers[index],
-                            focusNode: _focusNodes[index],
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            maxLength: 1,
-                            decoration: InputDecoration(
-                              counterText: '',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[100],
+        body: SafeArea(
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      kToolbarHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Enter the 6-digit code sent to',
+                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                          ),
+                          Text(
+                            widget.email,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                            onChanged: (value) {
-                              if (value.length == 1 && index < 5) {
-                                FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
-                              } else if (value.isEmpty && index > 0) {
-                                _otpControllers[index].clear();
-                                FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
-                              }
-                            },
                           ),
-                        );
-                      }),
-                    ),
-                    SizedBox(height: 16),
-                    if (_errorMessage.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          _errorMessage,
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
+                          SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(6, (index) {
+                              return SizedBox(
+                                width: 45,
+                                child: TextField(
+                                  controller: _otpControllers[index],
+                                  focusNode: _focusNodes[index],
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  maxLength: 1,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                  decoration: InputDecoration(
+                                    counterText: '',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey[100],
+                                  ),
+                                  onChanged: (value) {
+                                    if (value.length == 1 && index < 5) {
+                                      FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+                                    } else if (value.isEmpty && index > 0) {
+                                      FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
+                                    }
+                                  },
+                                ),
+                              );
+                            }),
                           ),
-                        ),
+                          SizedBox(height: 16),
+                          if (_errorMessage.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                _errorMessage,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                  ],
+                      Spacer(),
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _verifyOtp,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                                  : Text(
+                                'VERIFY OTP',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Center(
+                            child: TextButton(
+                              onPressed: _isLoading ? null : _generateOtp,
+                              child: Text(
+                                'Resend OTP',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _verifyOtp,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                            : Text(
-                          'VERIFY OTP',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: _isLoading ? null : _generateOtp,
-                        child: Text(
-                          'Resend OTP',
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
         ),

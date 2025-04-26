@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobitix/pages/TicketsPage.dart';
 import 'dart:convert';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 import 'HomePage.dart';
@@ -140,17 +141,30 @@ class _MappageState extends State<Mappage> {
       ),
 
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 0,
+        currentIndex: 3, // Set current index to 2 for TicketsPage
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => HomePage())
+            );
           } else if (index == 1) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => SearchPage())
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const TicketsPage()),
+            );
           } else if (index == 3) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
-          }
-          else if (index == 4) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+
+          } else if (index == 4) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => ProfilePage())
+            );
           }
         },
       ),

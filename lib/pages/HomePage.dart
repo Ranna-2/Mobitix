@@ -3,6 +3,7 @@ import 'SearchPage.dart';
 import 'MapPage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 import 'ProfilePage.dart';
+import 'TicketsPage.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -38,7 +39,10 @@ class HomePage extends StatelessWidget {
               child: Center(
                 child: Text(
                   "BANNER",
-                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -49,7 +53,8 @@ class HomePage extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             SizedBox(height: 12),
 
-            _buildRoundedInputField("From...", Icons.location_on, fromController),
+            _buildRoundedInputField(
+                "From...", Icons.location_on, fromController),
             SizedBox(height: 12),
             _buildRoundedInputField("To...", Icons.flag, toController),
             SizedBox(height: 12),
@@ -60,9 +65,12 @@ class HomePage extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      if (fromController.text.isEmpty || toController.text.isEmpty) {
+                      if (fromController.text.isEmpty ||
+                          toController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Please enter both departure and destination")),
+                          SnackBar(
+                              content: Text(
+                                  "Please enter both departure and destination")),
                         );
                         return;
                       }
@@ -79,7 +87,8 @@ class HomePage extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: primaryColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text("SEARCH BUSES", style: TextStyle(fontSize: 16)),
                   ),
@@ -130,7 +139,10 @@ class HomePage extends StatelessWidget {
               child: Center(
                 child: Text(
                   "🎉 20% Off on First Booking!",
-                  style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -138,26 +150,34 @@ class HomePage extends StatelessWidget {
         ),
       ),
 
-      // Bottom Navigation Bar
+      // Bottom Navigation Bar for the Home page
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 0,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+
           } else if (index == 1) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => SearchPage()));
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const TicketsPage()),
+            );
           } else if (index == 3) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
-          }
-          else if (index == 4) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => Mappage()));
+          } else if (index == 4) {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => ProfilePage()));
           }
         },
       ),
     );
   }
 
-  Widget _buildRoundedInputField(String label, IconData icon, TextEditingController controller) {
+  Widget _buildRoundedInputField(
+      String label, IconData icon, TextEditingController controller) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -201,7 +221,8 @@ class HomePage extends StatelessWidget {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: Text("VIEW", style: TextStyle(color: Colors.white)),
         ),

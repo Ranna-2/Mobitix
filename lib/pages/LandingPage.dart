@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'LoginPage.dart'; // Import the LoginPage for navigation
-import 'SignupPage.dart'; // Import the SignupPage for navigation
+import 'LoginPage.dart';
+import 'SignupPage.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -24,7 +24,7 @@ class _LandingPageState extends State<LandingPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(30),
                   child: Image.asset(
-                    "images/icon/app_icon1.png", // Update to your Mobitix image
+                    "images/icon/app_icon1.png",
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height / 2,
                     fit: BoxFit.cover,
@@ -88,7 +88,7 @@ class _LandingPageState extends State<LandingPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 20.0), // Add some space
+              SizedBox(height: 20.0),
               GestureDetector(
                 onTap: () {
                   // Navigate to the LoginPage

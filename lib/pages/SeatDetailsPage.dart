@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobitix/pages/TicketsPage.dart';
 import 'PaymentOptionsPage.dart';
 import 'SearchPage.dart';
 import 'HomePage.dart';
@@ -110,17 +111,33 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 0,
+        currentIndex: 2, // Set current index to 2 for TicketsPage
         onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+          if (index == 1) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => HomePage())
+            );
           } else if (index == 1) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => SearchPage())
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const TicketsPage()),
+            );
           } else if (index == 3) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
-          }
-          else if (index == 4) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => Mappage())
+            );
+          } else if (index == 4) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => ProfilePage())
+            );
           }
         },
       ),
