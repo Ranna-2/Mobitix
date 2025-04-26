@@ -62,7 +62,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
           );
         // After successful verification, login again
-        _login();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
       }
     }
     else {

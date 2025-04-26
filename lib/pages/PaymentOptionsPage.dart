@@ -6,6 +6,7 @@ import 'SearchPage.dart';
 import 'MapPage.dart';
 import 'ProfilePage.dart';
 import '../services/genie_payment_service.dart';
+import '../services/mock_payment_services.dart';
 
 class PaymentOptionsPage extends StatelessWidget {
   final int totalAmount;
@@ -33,89 +34,161 @@ class PaymentOptionsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Payment Options"),
         centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Trip Summary Card
             Card(
               elevation: 4,
-              shadowColor: Colors.black26,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Trip Summary", style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 10),
+                    const Text(
+                      "Trip Summary",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     _buildSummaryRow("Passenger:", passengerName),
                     _buildSummaryRow("Seats:", seats.join(", ")),
                     _buildSummaryRow("Route:", "$boarding → $destination"),
-                    _buildSummaryRow("Amount:", "LKR $totalAmount"),
+                    const Divider(height: 20),
+                    _buildSummaryRow(
+                      "Total Amount:",
+                      "LKR ${totalAmount.toStringAsFixed(2)}",
+                      isBold: true,
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 30),
-            Text("Select Payment Method", style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 24),
+
+            // Payment Methods Section
+            const Text(
+              "Select Payment Method",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 16),
-            _buildPaymentOption(context, "Genie", Icons.payment),
+
+            // Genie Payment Option
+            _buildPaymentOption(
+              context,
+              "Genie",
+              Icons.payment,
+              Colors.purpleAccent,
+            ),
             const SizedBox(height: 12),
-            _buildPaymentOption(context, "Koko", Icons.account_balance_wallet),
+
+            // Koko Payment Option
+            _buildPaymentOption(
+              context,
+              "Koko",
+              Icons.account_balance_wallet,
+              Colors.green,
+            ),
             const SizedBox(height: 12),
-            _buildPaymentOption(context, "eZcash", Icons.phone_android),
+
+            // eZcash Payment Option
+            _buildPaymentOption(
+              context,
+              "eZcash",
+              Icons.phone_android,
+              Colors.orange,
+            ),
             const SizedBox(height: 12),
-            _buildPaymentOption(context, "Onboard Payment", Icons.attach_money),
+
+            // Onboard Payment Option
+            _buildPaymentOption(
+              context,
+              "Onboard Payment",
+              Icons.attach_money,
+              Colors.blueGrey,
+            ),
           ],
         ),
-      ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 0,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => HomePage()));
           } else if (index == 1) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SearchPage()));
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => SearchPage()));
           } else if (index == 3) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Mappage()));
-          }
-          else if (index == 4) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => Mappage()));
+          } else if (index == 4) {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => ProfilePage()));
           }
         },
       ),
     );
   }
 
-  Widget _buildPaymentOption(BuildContext context, String method, IconData icon) {
+  Widget _buildPaymentOption(
+      BuildContext context, String method, IconData icon, Color color) {
     return InkWell(
       onTap: () {
         if (method == "Genie") {
           _processGeniePayment(context);
+        } else if (method == "Koko") {
+          _processKokoPayment(context);
+        } else if (method == "eZcash") {
+          _processEzCashPayment(context);
         } else {
-          _showPaymentConfirmation(context, method);
+          _processOnboardPayment(context);
         }
       },
       borderRadius: BorderRadius.circular(12),
-      child: Ink(
+      child: Container(
         decoration: BoxDecoration(
-          color: Colors.blue.shade50,
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.shade200),
+          border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(icon, size: 28, color: Colors.blueAccent),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color),
+              ),
               const SizedBox(width: 16),
               Expanded(
-                child: Text(method, style: const TextStyle(fontSize: 16)),
+                child: Text(
+                  method,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 20, color: Colors.grey),
+              const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
             ],
           ),
         ),
@@ -126,12 +199,7 @@ class PaymentOptionsPage extends StatelessWidget {
   Future<void> _processGeniePayment(BuildContext context) async {
     try {
       final genieService = GeniePaymentService();
-
-      // Generate a unique reference ID for this transaction
-      final referenceId = 'mobitix_${DateTime.now().millisecondsSinceEpoch}';
-
-      // For testing, you can use a deep link URL that your app can handle
-      // In production, this should be a URL that returns to your app
+      final referenceId = 'genie_${DateTime.now().millisecondsSinceEpoch}';
       const returnUrl = 'mobitix://payment-complete';
 
       // Show loading indicator
@@ -153,18 +221,81 @@ class PaymentOptionsPage extends StatelessWidget {
       // Close loading dialog
       Navigator.of(context).pop();
 
-      // Launch Genie payment page
-      final result = await FlutterWebAuth2.authenticate(
-        url: paymentUrl,
-        callbackUrlScheme: "mobitix",
+      // Show mock Genie payment dialog
+      final result = await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Genie Payment Gateway'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/genie_logo.png', // Add your Genie logo asset
+                  height: 60,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Amount: LKR ${totalAmount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Reference: $referenceId',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 30),
+                const Text(
+                  'Mock Genie Payment Simulation',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'For demonstration purposes only',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Enter any text to simulate payment',
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (value) {
+                    Navigator.pop(ctx,
+                        'mobitix://payment-complete?paymentId=$referenceId');
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(
+                  ctx, 'mobitix://payment-complete?status=cancelled'),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(
+                    ctx, 'mobitix://payment-complete?paymentId=$referenceId');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purpleAccent,
+              ),
+              child: const Text('Confirm Payment'),
+            ),
+          ],
+        ),
       );
 
-      // Extract payment ID from result URL
       final uri = Uri.parse(result);
       final paymentId = uri.queryParameters['paymentId'];
 
-      if (paymentId == null) {
-        throw Exception('Payment ID not found in return URL');
+      if (paymentId == null || uri.queryParameters['status'] == 'cancelled') {
+        throw Exception('Payment was cancelled');
       }
 
       // Verify payment
@@ -175,64 +306,266 @@ class PaymentOptionsPage extends StatelessWidget {
       );
 
       final verification = await genieService.verifyPayment(paymentId);
-
-      // Close loading dialog
       Navigator.of(context).pop();
 
       if (verification['status'] == 'SUCCESS') {
-        // Payment successful
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment successful via Genie!')),
+          const SnackBar(
+            content: Text('Payment successful via Genie!'),
+            backgroundColor: Colors.green,
+          ),
         );
-
-        // Navigate to ticket or confirmation page
-        // You'll need to implement this based on your app flow
+        // Navigate to confirmation page
+        _navigateToConfirmation(context, 'Genie', referenceId);
       } else {
-        // Payment failed
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment failed: ${verification['message']}')),
+          SnackBar(
+            content: Text('Payment failed: ${verification['message']}'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
-      Navigator.of(context).pop(); // Close any open dialogs
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error processing payment: $e')),
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-  Widget _buildSummaryRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(flex: 3, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600))),
-          Expanded(flex: 5, child: Text(value)),
+  Future<void> _processKokoPayment(BuildContext context) async {
+    try {
+      final kokoService = KokoPaymentService();
+      final referenceId = 'koko_${DateTime.now().millisecondsSinceEpoch}';
+
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // Process payment
+      final result = await kokoService.processPayment(
+        amount: totalAmount.toDouble(),
+        referenceId: referenceId,
+        passengerName: passengerName,
+        mobile: mobile,
+        email: email,
+        boarding: boarding,
+        destination: destination,
+        seats: seats,
+      );
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment successful via Koko!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Navigate to confirmation page
+        _navigateToConfirmation(context, 'Koko', referenceId);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment failed: ${result['message']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error processing Koko payment: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _processEzCashPayment(BuildContext context) async {
+    try {
+      final ezCashService = EzCashPaymentService();
+      final referenceId = 'ezcash_${DateTime.now().millisecondsSinceEpoch}';
+
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // Process payment
+      final result = await ezCashService.processPayment(
+        amount: totalAmount.toDouble(),
+        referenceId: referenceId,
+        passengerName: passengerName,
+        mobile: mobile,
+        email: email,
+        boarding: boarding,
+        destination: destination,
+        seats: seats,
+      );
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment successful via eZcash!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Navigate to confirmation page
+        _navigateToConfirmation(context, 'eZcash', referenceId);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment failed: ${result['message']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error processing eZcash payment: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _processOnboardPayment(BuildContext context) async {
+    final referenceId = 'onboard_${DateTime.now().millisecondsSinceEpoch}';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Onboard Payment"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("You will pay the conductor when boarding the bus."),
+            const SizedBox(height: 20),
+            Text(
+              "Amount: LKR ${totalAmount.toStringAsFixed(2)}",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Reference: $referenceId",
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Confirm"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Onboard payment reservation confirmed!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      // Navigate to confirmation page
+      _navigateToConfirmation(context, 'Onboard Payment', referenceId);
+    }
+  }
+
+  void _navigateToConfirmation(
+      BuildContext context, String method, String referenceId) {
+    // You should implement your actual confirmation page navigation here
+    // For now, we'll just show a dialog
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Payment Confirmed"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 60),
+            const SizedBox(height: 20),
+            Text(
+              "Paid via $method",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text("Reference: $referenceId"),
+            const SizedBox(height: 20),
+            Text(
+              "LKR ${totalAmount.toStringAsFixed(2)}",
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => HomePage()),
+              );
+            },
+            child: const Text("Done"),
+          ),
         ],
       ),
     );
   }
 
-  void _showPaymentConfirmation(BuildContext context, String method) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Confirm Payment"),
-        content: Text("Proceed with payment via $method for LKR $totalAmount?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+  Widget _buildSummaryRow(String label, String value, {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
+              ),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Payment processed with $method")),
-              );
-              // Navigate or handle next step after payment
-            },
-            child: const Text("Confirm"),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              ),
+              textAlign: TextAlign.end,
+            ),
           ),
         ],
       ),

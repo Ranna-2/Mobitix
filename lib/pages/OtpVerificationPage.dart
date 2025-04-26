@@ -33,6 +33,14 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   void initState() {
     super.initState();
     _generateOtp();
+    // Set up focus node listeners
+    for (int i = 0; i < _focusNodes.length; i++) {
+      _focusNodes[i].addListener(() {
+        if (!_focusNodes[i].hasFocus && _otpControllers[i].text.isEmpty && i > 0) {
+          FocusScope.of(context).requestFocus(_focusNodes[i-1]);
+        }
+      });
+    }
   }
 
   @override
@@ -58,6 +66,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   Future<void> _generateOtp() async {
+    if (_isLoading) return;
+
     setState(() {
       _isLoading = true;
       _errorMessage = '';
@@ -128,6 +138,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   }
 
   Future<void> _verifyOtp() async {
+    if (_isLoading) return;
+
     setState(() {
       _isLoading = true;
       _errorMessage = '';
@@ -168,7 +180,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         if (widget.isRegistration) {
           await _verifyUser();
         }
-        Navigator.pop(context, true);
+        // Return success to parent
+        Navigator.of(context).pop(true);
       } else {
         setState(() {
           _errorMessage = responseData['message'] ?? 'Invalid OTP';
@@ -187,129 +200,143 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('OTP Verification'),
-        backgroundColor: primaryColor,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height -
-                kToolbarHeight -
-                MediaQuery.of(context).padding.top,
+    return WillPopScope(
+      onWillPop: () async {
+        // Prevent back button from generating new OTP
+        Navigator.of(context).pop(false);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('OTP Verification'),
+          backgroundColor: primaryColor,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Enter the 6-digit code sent to',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                  ),
-                  Text(
-                    widget.email,
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  kToolbarHeight -
+                  MediaQuery.of(context).padding.top,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Enter the 6-digit code sent to',
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                     ),
-                  ),
-                  SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(6, (index) {
-                      return SizedBox(
-                        width: 45,
-                        child: TextField(
-                          controller: _otpControllers[index],
-                          focusNode: _focusNodes[index],
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          maxLength: 1,
-                          decoration: InputDecoration(
-                            counterText: '',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                    Text(
+                      widget.email,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(6, (index) {
+                        return SizedBox(
+                          width: 45,
+                          child: TextField(
+                            controller: _otpControllers[index],
+                            focusNode: _focusNodes[index],
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            maxLength: 1,
+                            decoration: InputDecoration(
+                              counterText: '',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
                             ),
-                            filled: true,
-                            fillColor: Colors.grey[100],
+                            onChanged: (value) {
+                              if (value.length == 1 && index < 5) {
+                                FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+                              } else if (value.isEmpty && index > 0) {
+                                _otpControllers[index].clear();
+                                FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
+                              }
+                            },
                           ),
-                          onChanged: (value) {
-                            if (value.length == 1 && index < 5) {
-                              _focusNodes[index + 1].requestFocus();
-                            } else if (value.isEmpty && index > 0) {
-                              _focusNodes[index - 1].requestFocus();
-                            }
-                          },
+                        );
+                      }),
+                    ),
+                    SizedBox(height: 16),
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          _errorMessage,
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
                         ),
-                      );
-                    }),
-                  ),
-                  SizedBox(height: 16),
-                  if (_errorMessage.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        _errorMessage,
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 14,
+                      ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _verifyOtp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : Text(
+                          'VERIFY OTP',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                ],
-              ),
-              Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _verifyOtp,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                          : Text(
-                        'VERIFY OTP',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                    SizedBox(height: 16),
+                    Center(
+                      child: TextButton(
+                        onPressed: _isLoading ? null : _generateOtp,
+                        child: Text(
+                          'Resend OTP',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Center(
-                    child: TextButton(
-                      onPressed: _isLoading ? null : _generateOtp,
-                      child: Text(
-                        'Resend OTP',
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

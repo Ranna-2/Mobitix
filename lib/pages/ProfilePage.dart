@@ -10,10 +10,10 @@ import 'OtpVerificationPage.dart';
 class ProfilePage extends StatelessWidget {
   // In a real app, you would get this from shared preferences or state management
   final Map<String, dynamic> userData = {
-    'FullName': 'John Doe',
-    'Email': 'john@example.com',
-    'PhoneNo': '+1234567890',
-    'CreatedAt': '2023-01-01',
+    'FullName': 'Saman Perera',
+    'Email': 'samanperera@gmail.com',
+    'PhoneNo': '0766665629',
+    'CreatedAt': '2025-04-25',
   };
 
   final Color primaryColor = Color(0xFFff3377);
