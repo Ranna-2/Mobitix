@@ -5,8 +5,10 @@ import 'HomePage.dart';
 import 'SearchPage.dart';
 import 'MapPage.dart';
 import 'ProfilePage.dart';
+import 'TicketConfirmationPage.dart';
 import '../services/genie_payment_service.dart';
 import '../services/mock_payment_services.dart';
+import '../model/ticket.dart';
 
 class PaymentOptionsPage extends StatelessWidget {
   final int totalAmount;
@@ -231,7 +233,7 @@ class PaymentOptionsPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/genie_logo.png', // Add your Genie logo asset
+                  'images/genie.png', // Add your Genie logo asset
                   height: 60,
                 ),
                 const SizedBox(height: 20),
@@ -499,8 +501,29 @@ class PaymentOptionsPage extends StatelessWidget {
 
   void _navigateToConfirmation(
       BuildContext context, String method, String referenceId) {
-    // You should implement your actual confirmation page navigation here
-    // For now, we'll just show a dialog
+    final newTicket = Ticket(
+      id: referenceId,
+      passengerName: passengerName,
+      mobile: mobile,
+      email: email,
+      seats: seats,
+      boarding: boarding,
+      destination: destination,
+      totalAmount: totalAmount.toDouble(),
+      bookingDate: DateTime.now(),
+      travelDate: DateTime.now().add(const Duration(days: 1)), // Example travel date
+      busName: 'Express Bus', // You should get this from previous screens
+      busId: 'bus123', // You should get this from previous screens
+      paymentMethod: method,
+      referenceId: referenceId,
+    );
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TicketConfirmationPage(ticket: newTicket),
+      ),
+    );
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
