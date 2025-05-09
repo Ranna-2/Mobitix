@@ -30,13 +30,13 @@ class _TicketsPageState extends State<TicketsPage> {
       tickets = [
         Ticket(
           id: 'ticket_123456',
-          passengerName: 'John Doe',
-          mobile: '0712345678',
-          email: 'john@example.com',
-          seats: ['A1', 'A2'],
+          passengerName: 'Saman Perera',
+          mobile: '0766665629',
+          email: 'samanperera@gmail.com',
+          seats: ['11', '10','18'],
           boarding: 'Colombo',
           destination: 'Kandy',
-          totalAmount: 1000.00,
+          totalAmount: 4500.00,
           bookingDate: DateTime.now(),
           travelDate: DateTime.now().add(const Duration(days: 1)),
           busName: 'Express Bus',

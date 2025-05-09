@@ -14,10 +14,10 @@ class ProfilePage extends StatelessWidget {
     'FullName': 'Saman Perera',
     'Email': 'samanperera@gmail.com',
     'PhoneNo': '0766665629',
-    'CreatedAt': '2025-04-25',
+    'CreatedAt': '2025-05-09',
   };
 
-  final Color primaryColor = Color(0xFFff3377);
+  final Color primaryColor = Color(0xFF3399ff);
   final Color secondaryColor = Color(0xFF3399ff);
 
   @override

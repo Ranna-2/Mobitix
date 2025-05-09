@@ -23,7 +23,7 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
   final TextEditingController boardingController = TextEditingController();
   final TextEditingController destinationController = TextEditingController();
 
-  int seatPrice = 500;
+  int seatPrice = 1500;
 
   @override
   Widget build(BuildContext context) {

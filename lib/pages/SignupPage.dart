@@ -39,7 +39,7 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.7/mobitix/register.php'),
+        Uri.parse('http://192.168.75.242/mobitix/register.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'fullName': _nameController.text.trim(),

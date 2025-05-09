@@ -33,16 +33,14 @@ class HomePage extends StatelessWidget {
               height: 150,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: primaryColor,
                 borderRadius: BorderRadius.circular(16),
+                // Optionally, you can add a box shadow or other decorations here
               ),
-              child: Center(
-                child: Text(
-                  "BANNER",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'images/bus.png', // Replace with your image path
+                  fit: BoxFit.cover, // This will ensure the image covers the entire area
                 ),
               ),
             ),
@@ -129,21 +127,44 @@ class HomePage extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             SizedBox(height: 12),
 
+
             Container(
-              height: 150,
+              height: 150, // Adjust height as needed
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.orangeAccent,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Center(
-                child: Text(
-                  "🎉 20% Off on First Booking!",
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                ),
+              child: ListView(
+                scrollDirection: Axis.horizontal, // Allows horizontal scrolling
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'images/promo1.png', // Replace with your first image path
+                      fit: BoxFit.cover,
+                      height: 60,
+                      width: 200, // Set width for each image
+                    ),
+                  ),
+                  SizedBox(width: 8), // Space between images
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'images/promo2.png', // Replace with your second image path
+                      fit: BoxFit.cover,
+                      height: 60,
+                      width: 200, // Set width for each image
+                    ),
+                  ),
+                  SizedBox(width: 8), // Space between images
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'images/promo3.png', // Replace with your third image path
+                      fit: BoxFit.cover,
+                      height: 60,
+                      width: 200, // Set width for each image
+                    ),
+                  ),
+                  // Add more images as needed
+                ],
               ),
             ),
           ],
