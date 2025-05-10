@@ -7,10 +7,12 @@ import 'MapPage.dart';
 import 'ProfilePage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 
+
 class SeatDetailsPage extends StatefulWidget {
   final List<String> selectedSeats;
 
-  const SeatDetailsPage({Key? key, required this.selectedSeats}) : super(key: key);
+  const SeatDetailsPage({Key? key, required this.selectedSeats})
+      : super(key: key);
 
   @override
   _SeatDetailsPageState createState() => _SeatDetailsPageState();
@@ -42,39 +44,65 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
             // Trip summary section
             Card(
               color: Colors.blue.shade50,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Trip Summary", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text("Trip Summary",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
-                      children: widget.selectedSeats.map((seat) => Chip(label: Text(seat))).toList(),
+                      children: widget.selectedSeats
+                          .map((seat) => Chip(label: Text(seat)))
+                          .toList(),
                     ),
                     const SizedBox(height: 10),
-                    Text("Total: $totalPrice LKR", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    Text("Total: $totalPrice LKR",
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
 
-            const Text("Passenger Information", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Passenger Information",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
 
-            _buildTextField(controller: nameController, label: "Full Name", icon: Icons.person),
-            _buildTextField(controller: mobileController, label: "Mobile Number", icon: Icons.phone, inputType: TextInputType.phone),
-            _buildTextField(controller: emailController, label: "Email", icon: Icons.email, inputType: TextInputType.emailAddress),
+            _buildTextField(
+                controller: nameController,
+                label: "Full Name",
+                icon: Icons.person),
+            _buildTextField(
+                controller: mobileController,
+                label: "Mobile Number",
+                icon: Icons.phone,
+                inputType: TextInputType.phone),
+            _buildTextField(
+                controller: emailController,
+                label: "Email",
+                icon: Icons.email,
+                inputType: TextInputType.emailAddress),
 
             const SizedBox(height: 20),
-            const Text("Travel Information", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Travel Information",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
 
-            _buildTextField(controller: boardingController, label: "Boarding Point", icon: Icons.location_on),
-            _buildTextField(controller: destinationController, label: "Destination Point", icon: Icons.flag),
+            _buildTextField(
+                controller: boardingController,
+                label: "Boarding Point",
+                icon: Icons.location_on),
+            _buildTextField(
+                controller: destinationController,
+                label: "Destination Point",
+                icon: Icons.flag),
 
             const SizedBox(height: 30),
             SizedBox(
@@ -85,7 +113,7 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   backgroundColor: Colors.teal,
-                  textStyle: const TextStyle(fontSize: 20),
+                  textStyle: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
                 onPressed: () {
                   if (_validateFields()) {
@@ -111,18 +139,15 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 2, // Set current index to 2 for TicketsPage
+        currentIndex: 3, // Set current index to 2 for TicketsPage
         onTap: (index) {
-          if (index == 1) {
+          if (index == 0) {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => HomePage())
             );
           } else if (index == 1) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => SearchPage())
-            );
+
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
@@ -131,8 +156,9 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
           } else if (index == 3) {
             Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => Mappage())
+                MaterialPageRoute(builder: (_) => const Mappage())
             );
+
           } else if (index == 4) {
             Navigator.pushReplacement(
                 context,

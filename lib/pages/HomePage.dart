@@ -88,7 +88,7 @@ class HomePage extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text("SEARCH BUSES", style: TextStyle(fontSize: 16)),
+                    child: Text("SEARCH BUSES", style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ),
                 SizedBox(width: 8),

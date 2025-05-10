@@ -239,7 +239,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             ),
           );
         },
-        label: const Text('Continue', style: TextStyle(fontSize: 16)),
+        label: const Text('Continue', style: TextStyle(fontSize: 16, color: Colors.white)),
       ),
     );
   }

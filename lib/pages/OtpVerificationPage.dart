@@ -323,6 +323,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                 'VERIFY OTP',
                                 style: TextStyle(
                                   fontSize: 16,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
