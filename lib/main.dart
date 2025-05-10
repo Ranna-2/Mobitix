@@ -17,7 +17,7 @@ class MobitixApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home:  AdminDashboard(), // Start with LandingPage
+      home:  LandingPage(),
       debugShowCheckedModeBanner: false,
     );
   }

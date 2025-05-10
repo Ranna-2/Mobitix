@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'manage_schedules.dart';
 import 'manage_reservations.dart';
 import 'performance_analytics.dart';
+import '../pages/LoginPage.dart'; // Make sure this exists or rename accordingly
 
 class AdminDashboard extends StatelessWidget {
   final Color primaryColor = Colors.blue;
@@ -13,6 +14,22 @@ class AdminDashboard extends StatelessWidget {
         backgroundColor: primaryColor,
         title: Text('Admin Dashboard'),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'logout') {
+                _showLogoutConfirmation(context);
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem(
+                value: 'logout',
+                child: Text('Logout'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -77,6 +94,36 @@ class AdminDashboard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Confirm Logout'),
+        content: Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(), // Dismiss
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(); // Close dialog
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => LoginPage()),
+                    (route) => false,
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(
+              'Logout',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
