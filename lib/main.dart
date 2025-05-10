@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobitix/admin_dashboard/admin_dashboard.dart';
 import 'package:mobitix/pages/LandingPage.dart';
 import 'package:mobitix/pages/HomePage.dart';
 
@@ -16,7 +17,7 @@ class MobitixApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LandingPage(), // Start with LandingPage
+      home:  AdminDashboard(), // Start with LandingPage
       debugShowCheckedModeBanner: false,
     );
   }

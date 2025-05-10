@@ -70,7 +70,7 @@ class _SearchPageState extends State<SearchPage> {
       final response = await http
           .get(
             Uri.parse(
-                'http://192.168.75.242/mobitix/fetch_buses.php?from=$from&to=$to&date=$formattedDate'),
+                'http://192.168.1.7/mobitix/fetch_buses.php?from=$from&to=$to&date=$formattedDate'),
           )
           .timeout(Duration(seconds: 10));
 

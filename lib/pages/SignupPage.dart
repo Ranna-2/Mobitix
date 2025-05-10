@@ -39,13 +39,14 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.75.242/mobitix/register.php'),
+        Uri.parse('http://192.168.1.7/mobitix/register.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'fullName': _nameController.text.trim(),
           'email': _emailController.text.trim(),
           'phoneNo': _phoneController.text.trim(),
           'password': _passwordController.text.trim(),
+          // Removed role from the request
         }),
       );
 
@@ -136,8 +137,9 @@ class _SignupPageState extends State<SignupPage> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                            _errorMessage,
-                            style: TextStyle(color: Colors.red)),
+                          _errorMessage,
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                     ],
                   ),
@@ -200,7 +202,7 @@ class _SignupPageState extends State<SignupPage> {
                     'SIGN UP',
                     style: TextStyle(
                       fontSize: 16,
-                      color:Colors.white,
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

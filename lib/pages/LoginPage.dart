@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'HomePage.dart';
 import 'SignupPage.dart';
 import 'OtpVerificationPage.dart';
+import '../admin_dashboard/admin_dashboard.dart'; // Import the Admin Dashboard
 
 class LoginPage extends StatefulWidget {
   @override
@@ -30,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.75.242/mobitix/login.php'),
+        Uri.parse('http://192.168.1.7/mobitix/login.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),
@@ -45,13 +46,23 @@ class _LoginPageState extends State<LoginPage> {
       if (success) {
         final isVerified = responseData['user']?['is_verified'] == true ||
             responseData['user']?['is_verified'] == 1;
+        final userRole = responseData['user']?['Role']; // Get the user role
 
         if (isVerified) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          );
-      } else {
+          if (userRole == 'admin') {
+            // Navigate to Admin Dashboard
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminDashboard()),
+            );
+          } else {
+            // Navigate to User Dashboard
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          }
+        } else {
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -61,14 +72,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           );
-        // After successful verification, login again
+          // After successful verification, login again
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => HomePage()),
           );
-      }
-    }
-    else {
+        }
+      } else {
         setState(() {
           _errorMessage = responseData['message'] ?? 'Login failed';
         });
