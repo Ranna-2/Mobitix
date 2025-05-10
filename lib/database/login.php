@@ -7,7 +7,7 @@ if(!empty($data->email) && !empty($data->password)) {
     $email = $data->email;
     $password = $data->password;
     
-    $query = "SELECT * FROM Users WHERE Email = ?";
+    $query = "SELECT * FROM users WHERE Email = ?";
     $stmt = $conn->prepare($query);
     $stmt->execute([$email]);
     
@@ -20,7 +20,7 @@ if(!empty($data->email) && !empty($data->password)) {
             echo json_encode([
                 "success" => true, 
                 "message" => "Login successful", 
-                "user" => $user
+                "user" => $user // This will include the role
             ]);
         } else {
             echo json_encode(["success" => false, "message" => "Invalid password"]);

@@ -19,7 +19,6 @@ if ($method === 'POST') {
         // Simulate payment processing delay
         sleep(2);
         
-        // Randomly decide if payment succeeds (80% chance) or fails (20% chance)
         $success = rand(1, 100) <= 80;
         $status = $success ? 'success' : 'failed';
         
