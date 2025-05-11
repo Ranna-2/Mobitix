@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.7/mobitix/login.php'),
+        Uri.parse('http://192.168.75.242/mobitix/login.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),

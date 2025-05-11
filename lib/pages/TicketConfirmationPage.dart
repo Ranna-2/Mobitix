@@ -35,20 +35,61 @@ class TicketConfirmationPage extends StatelessWidget {
             const SizedBox(height: 30),
             _buildTicketCard(context),
             const SizedBox(height: 30),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.download),
-              label: const Text('Download Ticket as PDF'),
-              onPressed: () => _generateAndSavePdf(context),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade800,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                onPressed: () => _generateAndSavePdf(context),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.download_rounded, size: 24),
+                    SizedBox(width: 10),
+                    Text(
+                      'Download Ticket as PDF',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              child: const Text('View My Tickets'),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TicketsPage()),
-                );
-              },
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.blue.shade800,
+                  side: BorderSide(color: Colors.blue.shade800),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TicketsPage()),
+                  );
+                },
+                child: const Text(
+                  'View My Tickets',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
