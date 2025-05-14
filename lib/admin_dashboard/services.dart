@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const String baseUrl = 'http://192.168.75.242/mobitix';
+const String baseUrl = 'http://192.168.106.242/mobitix';
 
 
 Future<List<dynamic>> fetchAllBusSchedules() async {

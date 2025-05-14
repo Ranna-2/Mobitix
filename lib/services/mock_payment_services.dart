@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class KokoPaymentService {
-  static const String _baseUrl = 'http://192.168.75.242/mobitix/payment.php';
+  static const String _baseUrl = 'http://192.168.106.242/mobitix/payment.php';
 
   Future<Map<String, dynamic>> processPayment({
     required double amount,
@@ -39,7 +39,7 @@ class KokoPaymentService {
 }
 
 class EzCashPaymentService {
-  static const String _baseUrl = 'http://192.168.75.242/mobitix/payment.php';
+  static const String _baseUrl = 'http://192.168.106.242/mobitix/payment.php';
 
   Future<Map<String, dynamic>> processPayment({
     required double amount,

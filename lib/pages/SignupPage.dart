@@ -15,7 +15,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  String _selectedRole = 'user'; // Default role is 'user'
+
 
   final Color primaryColor = Color(0xFFff3377);
   final Color secondaryColor = Color(0xFF3399ff);
@@ -23,8 +23,70 @@ class _SignupPageState extends State<SignupPage> {
 
   bool _isLoading = false;
   String _errorMessage = '';
+  bool _validateEmail(String email) {
+    return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email);
+  }
+
+  bool _validatePhone(String phone) {
+    return RegExp(r'^[0-9]{10}$').hasMatch(phone);
+  }
+
+  bool _validatePassword(String password) {
+    return password.length >= 8 &&
+        RegExp(r'[A-Z]').hasMatch(password) &&
+        RegExp(r'[a-z]').hasMatch(password) &&
+        RegExp(r'[0-9]').hasMatch(password) &&
+        RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+  }
+
 
   Future<void> _register() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    // Client-side validation
+    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please fill in all fields';
+      });
+      return;
+    }
+
+    if (!_validateEmail(email)) {
+      setState(() {
+        _errorMessage = 'Please enter a valid email address';
+      });
+      return;
+    }
+
+    if (!_validatePhone(phone)) {
+      setState(() {
+        _errorMessage = 'Phone number must be 10 digits';
+      });
+      return;
+    }
+
+    if (!_validatePassword(password)) {
+      setState(() {
+        _errorMessage = 'Password must be at least 8 characters with uppercase, lowercase, number, and special character';
+      });
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setState(() {
+        _errorMessage = "Passwords don't match";
+      });
+      return;
+    }
+
+
+
+
     setState(() {
       _isLoading = true;
       _errorMessage = '';
@@ -40,14 +102,14 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.75.242/mobitix/register.php'),
+        Uri.parse('http://192.168.106.242/mobitix/register.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'fullName': _nameController.text.trim(),
           'email': _emailController.text.trim(),
           'phoneNo': _phoneController.text.trim(),
           'password': _passwordController.text.trim(),
-          'role': _selectedRole, // Include role in the request
+
         }),
       );
 
@@ -178,41 +240,7 @@ class _SignupPageState extends State<SignupPage> {
                               icon: Icons.phone,
                               inputType: TextInputType.phone,
                             ),
-                            SizedBox(height: 16),
-                            // Role Dropdown
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: DropdownButtonFormField<String>(
-                                value: _selectedRole,
-                                items: [
-                                  DropdownMenuItem(
-                                    value: 'user',
-                                    child: Text('Regular User'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'admin',
-                                    child: Text('Administrator'),
-                                  ),
-                                ],
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedRole = value!;
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  labelText: 'Account Type',
-                                  prefixIcon: Icon(Icons.account_circle, color: primaryColor),
-                                  border: InputBorder.none,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                isExpanded: true,
-                              ),
-                            ),
+
                             SizedBox(height: 16),
                             _buildInputField(
                               controller: _passwordController,

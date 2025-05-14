@@ -22,8 +22,39 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   String _errorMessage = '';
+  bool _validateEmail(String email) {
+    return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email);
+  }
+
+
 
   Future<void> _login() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Client-side validation
+    if (email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please fill in all fields';
+      });
+      return;
+    }
+
+    if (!_validateEmail(email)) {
+      setState(() {
+        _errorMessage = 'Please enter a valid email address';
+      });
+      return;
+    }
+
+    if (password.length < 8) {
+      setState(() {
+        _errorMessage = 'Password must be at least 8 characters';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = '';
@@ -31,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.75.242/mobitix/login.php'),
+        Uri.parse('http://192.168.106.242/mobitix/login.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),
@@ -51,11 +82,19 @@ class _LoginPageState extends State<LoginPage> {
         if (isVerified) {
           if (userRole == 'admin') {
             // Navigate to Admin Dashboard
+            final email = _emailController.text.trim();
+            if (_isValidAdminEmail(email)) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => AdminDashboard()),
             );
-          } else {
+          }  else {
+              setState(() {
+                _errorMessage = 'Admin access denied';
+              });
+            }
+          }
+          else {
             // Navigate to User Dashboard
             Navigator.pushReplacement(
               context,
@@ -92,6 +131,40 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
       });
     }
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.106.242//mobitix/login.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text.trim(),
+        }),
+      );
+
+      // Add response validation
+      if (response.body.contains('<br />')) {
+        throw FormatException('Server returned HTML instead of JSON');
+      }
+
+      final responseData = json.decode(response.body);
+      // ... rest of your login logic
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Login failed. Please try again."; // Generic error message
+        if (e.toString().contains('HTML')) {
+          _errorMessage = "Server configuration error";
+        }
+      });
+    }
+  }
+
+  bool _isValidAdminEmail(String email) {
+    final allowedAdminEmails = [
+      'admin@mobitix.com',
+      'superadmin@mobitix.com'
+      // Add other authorized admin emails here
+    ];
+    return allowedAdminEmails.contains(email);
   }
 
   @override

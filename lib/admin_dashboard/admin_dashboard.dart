@@ -7,8 +7,27 @@ import '../pages/LoginPage.dart'; // Make sure this exists or rename accordingly
 class AdminDashboard extends StatelessWidget {
   final Color primaryColor = Colors.blue;
 
+
+  // Add a method to verify admin status (could be enhanced with token verification)
+  static Future<bool> verifyAdminStatus(BuildContext context) async {
+    // In a real app, you would verify admin status from server
+    // For now, we'll just ensure it's only accessed via proper login flow
+    final route = ModalRoute.of(context);
+    if (route == null || route.settings.name != '/admin') {
+      Navigator.of(context).pushReplacementNamed('/login');
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!await verifyAdminStatus(context)) {
+        return;
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,

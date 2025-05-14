@@ -76,7 +76,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
     try {
       final response = await _client.post(
-        Uri.parse('http://192.168.75.242/mobitix/otp.php'),
+        Uri.parse('http://192.168.106.242/mobitix/otp.php'),
         headers: {
           'Content-Type': 'application/json',
           if (_sessionId != null) 'Cookie': 'PHPSESSID=$_sessionId',
@@ -120,7 +120,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
   Future<void> _verifyUser() async {
     final response = await _client.post(
-      Uri.parse('http://192.168.75.242/mobitix/verify_user.php'),
+      Uri.parse('http://192.168.106.242/mobitix/verify_user.php'),
       headers: {
         'Content-Type': 'application/json',
         if (_sessionId != null) 'Cookie': 'PHPSESSID=$_sessionId',
@@ -158,7 +158,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
     try {
       final response = await _client.post(
-        Uri.parse('http://192.168.75.242/mobitix/otp.php'),
+        Uri.parse('http://192.168.106.242/mobitix/otp.php'),
         headers: {
           'Content-Type': 'application/json',
           if (_sessionId != null) 'Cookie': 'PHPSESSID=$_sessionId',
