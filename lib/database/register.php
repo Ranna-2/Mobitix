@@ -2,6 +2,10 @@
 require_once 'config.php';
 
 header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
+error_reporting(0); 
 
 $data = json_decode(file_get_contents("php://input"));
 
@@ -28,11 +32,7 @@ if(!empty($data->email) && !empty($data->password) && !empty($data->fullName) &&
         exit();
     }
 
-    // Validate role
-    if (!in_array($data->role, ['admin', 'user'])) {
-        echo json_encode(["success" => false, "message" => "Invalid role specified"]);
-        exit();
-    }
+ 
 
     // Validate name length
     if (strlen($data->fullName) < 2 || strlen($data->fullName) > 100) {
