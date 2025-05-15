@@ -19,6 +19,7 @@ class PaymentOptionsPage extends StatelessWidget {
   final String email;
   final String boarding;
   final String destination;
+  final String busId;
 
   const PaymentOptionsPage({
     Key? key,
@@ -29,6 +30,7 @@ class PaymentOptionsPage extends StatelessWidget {
     required this.email,
     required this.boarding,
     required this.destination,
+    required this.busId,
   }) : super(key: key);
 
   @override
@@ -529,7 +531,7 @@ class PaymentOptionsPage extends StatelessWidget {
       busName: 'Express Bus', // You should get this from previous screens
       busId: 'bus123', // You should get this from previous screens
       paymentMethod: method,
-      referenceId: referenceId,
+      referenceId: referenceId, status: '',
     );
     Navigator.pushReplacement(
       context,
