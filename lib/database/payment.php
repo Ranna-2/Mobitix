@@ -41,12 +41,30 @@ if ($method === 'POST') {
         
         // Insert payment record
         $stmt = $conn->prepare("INSERT INTO payments (
-            payment_method, amount, reference_id, passenger_name, seats,
-            boarding_point, destination, email, mobile, status
-        ) VALUES (
-            :payment_method, :amount, :reference_id, :passenger_name, :seats,
-            :boarding_point, :destination, :email, :mobile, :status
-        )");
+    bus_id,
+    payment_method, 
+    amount, 
+    reference_id, 
+    passenger_name, 
+    seats, 
+    boarding_point, 
+    destination, 
+    email, 
+    mobile, 
+    status
+) VALUES (
+    :bus_id,
+    :payment_method,
+    :amount,
+    :reference_id,
+    :passenger_name,
+    :seats,
+    :boarding_point,
+    :destination,
+    :email,
+    :mobile,
+    'success'
+)");
         
         $stmt->execute([
             ':payment_method' => $data['payment_method'],

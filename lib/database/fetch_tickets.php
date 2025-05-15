@@ -4,16 +4,15 @@ header("Content-Type: application/json; charset=UTF-8");
 
 include 'db.php';
 
-// Get user ID from query parameters (you might want to use session or token in production)
-$user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+// Get user ID from query parameters
 $mobile = isset($_GET['mobile']) ? $conn->real_escape_string($_GET['mobile']) : '';
 
-if ($user_id <= 0 && empty($mobile)) {
+if (empty($mobile)) {
     http_response_code(400);
-    die(json_encode(['error' => 'Invalid user identifier']));
+    die(json_encode(['error' => 'Mobile number is required']));
 }
 
-// Fetch tickets based on either user ID or mobile number
+// Fetch tickets based on mobile number
 $sql = "SELECT 
         p.id as payment_id,
         p.payment_method,
@@ -35,11 +34,9 @@ $sql = "SELECT
             ELSE 'completed'
         END as status
     FROM payments p
-    LEFT JOIN buses b ON JSON_CONTAINS(p.seats, (SELECT GROUP_CONCAT(CONCAT('\"', seat_number, '\"')) 
-                                               FROM seat_reservations 
-                                               WHERE payment_id = p.id), '$')
+    LEFT JOIN buses b ON b.id = p.bus_id
     WHERE p.status = 'success' 
-    AND (p.mobile = '$mobile' OR p.id IN (SELECT payment_id FROM seat_reservations WHERE payment_id IS NOT NULL))";
+    AND p.mobile = '$mobile'";
 
 $result = $conn->query($sql);
 
@@ -50,26 +47,9 @@ if (!$result) {
 
 $tickets = [];
 while ($row = $result->fetch_assoc()) {
-    // Convert seats from string to array
-    $seats = json_decode($row['seats']) ?: explode(', ', $row['seats']);
-    
-    $tickets[] = [
-        'id' => 'ticket_' . $row['payment_id'],
-        'passengerName' => $row['passenger_name'],
-        'mobile' => $row['mobile'],
-        'email' => $row['email'],
-        'seats' => $seats,
-        'boarding' => $row['boarding'],
-        'destination' => $row['destination'],
-        'totalAmount' => (float)$row['total_amount'],
-        'bookingDate' => $row['booking_date'],
-        'travelDate' => $row['departure_time'],
-        'busName' => $row['bus_name'],
-        'busId' => $row['bus_id'],
-        'paymentMethod' => $row['payment_method'],
-        'referenceId' => $row['reference_id'],
-        'status' => $row['status']
-    ];
+    // Ensure all fields are properly formatted
+    $row['seats'] = !empty($row['seats']) ? explode(',', $row['seats']) : [];
+    $tickets[] = $row;
 }
 
 echo json_encode($tickets);

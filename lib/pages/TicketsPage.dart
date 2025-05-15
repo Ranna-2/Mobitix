@@ -29,7 +29,7 @@ class _TicketsPageState extends State<TicketsPage> {
     _loadTickets();
   }
 
-   Future<void> _loadTickets() async {
+  Future<void> _loadTickets() async {
     try {
       // Replace with actual user mobile number or ID
       final userMobile = '0766665629'; // This should come from your auth system
@@ -37,7 +37,7 @@ class _TicketsPageState extends State<TicketsPage> {
       final response = await http.get(
         Uri.parse('http://192.168.106.242/mobitix/fetch_tickets.php?mobile=$userMobile'),
       );
-    // Mock data - replace with actual data loading
+      // Mock data - replace with actual data loading
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
