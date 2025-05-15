@@ -112,8 +112,13 @@ class _SignupPageState extends State<SignupPage> {
 
         }),
       );
+      if (response.body.contains('<br />') || !response.body.startsWith('{')) {
+        throw FormatException('Server returned invalid response');
+      }
 
       final responseData = json.decode(response.body);
+
+
 
       if (responseData['success']) {
         await Navigator.push(
@@ -137,7 +142,9 @@ class _SignupPageState extends State<SignupPage> {
     } catch (e) {
       setState(() {
         _errorMessage = "Connection error: ${e.toString()}";
-      });
+        if (e.toString().contains('FormatException')) {
+          _errorMessage = "Server configuration error";
+      }});
     } finally {
       setState(() {
         _isLoading = false;
