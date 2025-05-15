@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mobitix/pages/HomePage.dart';
 import 'package:mobitix/pages/SearchPage.dart';
 import 'package:mobitix/pages/SeatDetailsPage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
 import 'MapPage.dart';
 import 'ProfilePage.dart';
+import 'package:http/http.dart' as http;
 
 class SeatSelectionPage extends StatefulWidget {
   final String busId;
@@ -23,6 +27,19 @@ class SeatSelectionPage extends StatefulWidget {
 class _SeatSelectionPageState extends State<SeatSelectionPage> {
   final Set<int> selectedSeats = {};
   final double seatPrice = 1500.00;
+  Set<int> _reservedSeats = {};
+  DateTime selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchReservedSeats().then((seats) {
+      setState(() {
+        _reservedSeats = seats;
+      });
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,9 +142,28 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
       ],
     );
   }
+  Future<Set<int>> _fetchReservedSeats() async {
+    try {
+      final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
+      final response = await http.get(
+        Uri.parse('http://192.168.106.242/mobitix/check_seat_availability.php?bus_id=${widget.busId}&date=$formattedDate'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final reservedSeats = List<int>.from(data['reserved_seats'].map((e) => int.parse(e.toString())));
+        return reservedSeats.toSet();
+      } else {
+        throw Exception('Failed to load reserved seats');
+      }
+    } catch (e) {
+      print('Error fetching reserved seats: $e');
+      return {}; // Return empty set if there's an error
+    }
+  }
 
   Widget _buildSeatItem(int seatNumber) {
-    bool isOccupied = [4, 7, 15, 22, 30, 38].contains(seatNumber);
+    bool isOccupied = _reservedSeats.contains(seatNumber); // Now using the fetched reserved seats
     bool isSelected = selectedSeats.contains(seatNumber);
 
     return GestureDetector(
@@ -164,7 +200,6 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
       ),
     );
   }
-
   Widget _buildSeatLegend() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -235,6 +270,7 @@ class _SeatSelectionPageState extends State<SeatSelectionPage> {
             MaterialPageRoute(
               builder: (context) => SeatDetailsPage(
                 selectedSeats: selectedSeats.map((e) => e.toString()).toList(),
+                busId: widget.busId, // Add this line to pass the busId
               ),
             ),
           );

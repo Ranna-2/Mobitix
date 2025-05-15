@@ -6,13 +6,19 @@ import 'HomePage.dart';
 import 'MapPage.dart';
 import 'ProfilePage.dart';
 import 'package:mobitix/widgets/CustomBottomNavBar.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class SeatDetailsPage extends StatefulWidget {
   final List<String> selectedSeats;
+  final String busId; // Added busId parameter
 
-  const SeatDetailsPage({Key? key, required this.selectedSeats})
-      : super(key: key);
+  const SeatDetailsPage({
+    Key? key,
+    required this.selectedSeats,
+    required this.busId, // Added busId parameter
+  }) : super(key: key);
 
   @override
   _SeatDetailsPageState createState() => _SeatDetailsPageState();
@@ -115,22 +121,48 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
                   backgroundColor: Colors.teal,
                   textStyle: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_validateFields()) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PaymentOptionsPage(
-                          totalAmount: totalPrice,
-                          seats: widget.selectedSeats,
-                          passengerName: nameController.text,
-                          mobile: mobileController.text,
-                          email: emailController.text,
-                          boarding: boardingController.text,
-                          destination: destinationController.text,
-                        ),
-                      ),
-                    );
+                    try {
+                      // First reserve the seats
+                      final response = await http.post(
+                        Uri.parse('http://192.168.106.242/mobitix/reserve_seats.php'),
+                        headers: {'Content-Type': 'application/json'},
+                        body: json.encode({
+                          'bus_id': widget.busId,
+                          'seats': widget.selectedSeats,
+                          'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                        }),
+                      );
+
+                      if (response.statusCode == 200) {
+                        // Proceed to payment if reservation was successful
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PaymentOptionsPage(
+                              totalAmount: totalPrice,
+                              seats: widget.selectedSeats,
+                              passengerName: nameController.text,
+                              mobile: mobileController.text,
+                              email: emailController.text,
+                              boarding: boardingController.text,
+                              destination: destinationController.text,
+                              busId: widget.busId,
+                            ),
+                          ),
+                        );
+                      } else {
+                        final error = json.decode(response.body)['error'];
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(error ?? 'Failed to reserve seats')),
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
+                    }
                   }
                 },
               ),
@@ -147,7 +179,7 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
                 MaterialPageRoute(builder: (_) => HomePage())
             );
           } else if (index == 1) {
-
+            // Handle search page navigation if needed
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
@@ -158,7 +190,6 @@ class _SeatDetailsPageState extends State<SeatDetailsPage> {
                 context,
                 MaterialPageRoute(builder: (_) => const Mappage())
             );
-
           } else if (index == 4) {
             Navigator.pushReplacement(
                 context,

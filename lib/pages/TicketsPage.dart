@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../model/ticket.dart';
 import 'TicketConfirmationPage.dart';
@@ -6,6 +8,7 @@ import 'SearchPage.dart';
 import 'MapPage.dart';
 import 'ProfilePage.dart';
 import '../widgets/CustomBottomNavBar.dart';
+import 'package:http/http.dart' as http;
 
 class TicketsPage extends StatefulWidget {
   const TicketsPage({Key? key}) : super(key: key);
@@ -17,6 +20,8 @@ class TicketsPage extends StatefulWidget {
 class _TicketsPageState extends State<TicketsPage> {
   List<Ticket> tickets = []; // You would load these from your database/backend
 
+
+
   @override
   void initState() {
     super.initState();
@@ -24,31 +29,66 @@ class _TicketsPageState extends State<TicketsPage> {
     _loadTickets();
   }
 
-  void _loadTickets() {
+   Future<void> _loadTickets() async {
+    try {
+      // Replace with actual user mobile number or ID
+      final userMobile = '0766665629'; // This should come from your auth system
+
+      final response = await http.get(
+        Uri.parse('http://192.168.106.242/mobitix/fetch_tickets.php?mobile=$userMobile'),
+      );
     // Mock data - replace with actual data loading
-    setState(() {
-      tickets = [
-        Ticket(
-          id: 'ticket_123456',
-          passengerName: 'Saman Perera',
-          mobile: '0766665629',
-          email: 'samanperera@gmail.com',
-          seats: ['11', '10','18'],
-          boarding: 'Colombo',
-          destination: 'Kandy',
-          totalAmount: 4500.00,
-          bookingDate: DateTime.now(),
-          travelDate: DateTime.now().add(const Duration(days: 1)),
-          busName: 'Express Bus',
-          busId: 'bus123',
-          paymentMethod: 'Genie',
-          referenceId: 'ref_123456',
-          status: 'upcoming',
-        ),
-        // Add more tickets as needed
-      ];
-    });
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          tickets = data.map((t) => Ticket(
+            id: t['id'],
+            passengerName: t['passengerName'],
+            mobile: t['mobile'],
+            email: t['email'],
+            seats: List<String>.from(t['seats'].map((s) => s.toString())),
+            boarding: t['boarding'],
+            destination: t['destination'],
+            totalAmount: t['totalAmount'],
+            bookingDate: DateTime.parse(t['bookingDate']),
+            travelDate: DateTime.parse(t['travelDate']),
+            busName: t['busName'],
+            busId: t['busId'].toString(),
+            paymentMethod: t['paymentMethod'],
+            referenceId: t['referenceId'],
+            status: t['status'],
+          )).toList();
+        });
+      } else {
+        throw Exception('Failed to load tickets');
+      }
+    } catch (e) {
+      print('Error loading tickets: $e');
+      // Fallback to mock data if API fails (remove in production)
+      setState(() {
+        tickets = [
+          Ticket(
+            id: 'ticket_123456',
+            passengerName: 'Rina Maharoof',
+            mobile: '0766665629',
+            email: 'samanperera@gmail.com',
+            seats: ['49', '50','48'],
+            boarding: 'Colombo',
+            destination: 'Kandy',
+            totalAmount: 4500.00,
+            bookingDate: DateTime.now(),
+            travelDate: DateTime.now().add(const Duration(days: 1)),
+            busName: 'Express Bus',
+            busId: 'bus123',
+            paymentMethod: 'Genie',
+            referenceId: 'ref_123456',
+            status: 'upcoming',
+          ),
+        ];
+      });
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {

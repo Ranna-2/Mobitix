@@ -1,4 +1,3 @@
-// models/ticket.dart
 class Ticket {
   final String id;
   final String passengerName;
@@ -31,8 +30,27 @@ class Ticket {
     required this.busId,
     required this.paymentMethod,
     required this.referenceId,
-    this.status = 'upcoming',
+    required this.status,
   });
 
-// Add fromJson and toJson methods if you need to serialize/deserialize
+  // Add fromJson method for easier conversion
+  factory Ticket.fromJson(Map<String, dynamic> json) {
+    return Ticket(
+      id: json['id'],
+      passengerName: json['passengerName'],
+      mobile: json['mobile'],
+      email: json['email'],
+      seats: List<String>.from(json['seats'].map((s) => s.toString())),
+      boarding: json['boarding'],
+      destination: json['destination'],
+      totalAmount: json['totalAmount'].toDouble(),
+      bookingDate: DateTime.parse(json['bookingDate']),
+      travelDate: DateTime.parse(json['travelDate']),
+      busName: json['busName'],
+      busId: json['busId'].toString(),
+      paymentMethod: json['paymentMethod'],
+      referenceId: json['referenceId'],
+      status: json['status'],
+    );
+  }
 }

@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+include 'db.php'; // Add this line to connect to database
 
 header('Content-Type: application/json');
 
@@ -7,15 +8,31 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
+    error_log("Payment request received: " . print_r($data, true));
     
-    // Validate required fields
-    if (empty($data['payment_method']) || empty($data['amount']) || empty($data['reference_id'])) {
+    // Validate required fields with better error reporting
+    if (empty($data['payment_method'])) {
+        error_log("Validation failed: payment_method missing");
         http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+        echo json_encode(['success' => false, 'message' => 'Payment method is required']);
+        exit();
+    }
+    if (empty($data['amount'])) {
+        error_log("Validation failed: amount missing");
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Amount is required']);
+        exit();
+    }
+    if (empty($data['reference_id'])) {
+        error_log("Validation failed: reference_id missing");
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Reference ID is required']);
         exit();
     }
     
     try {
+        error_log("Attempting to process payment with data: " . json_encode($data));
+        
         // Simulate payment processing delay
         sleep(2);
         
@@ -45,6 +62,7 @@ if ($method === 'POST') {
         ]);
         
         $paymentId = $conn->lastInsertId();
+        error_log("Payment processed successfully. ID: $paymentId");
         
         echo json_encode([
             'success' => $success,
@@ -54,6 +72,7 @@ if ($method === 'POST') {
         ]);
         
     } catch (PDOException $e) {
+        error_log("Database error: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
